@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>E. Raja | Portfolio</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <nav>
+        
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/skills">Skills</a>
+            <a href="/projects">Projects</a>
+            <a href="/contact">Contact</a>
+        </div>
+    </nav>
+
+
+    <main>
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <p class="welcome">WELCOME TO MY PORTFOLIO</p>
+
+                <h1>
+                    Hi, I'm <span>E. Raja</span>
+                </h1>
+
+                <h2>
+                    Python Developer & Web Developer
+                </h2>
+
+                <p class="hero-text">
+                    I am a Computer Applications student passionate about
+                    Python, Web Development and Cyber Security.
+                    I enjoy building practical projects and learning new technologies.
+                </p>
+
+                <div class="hero-buttons">
+
+                    <a href="/projects" class="primary-btn">
+                        View My Projects
+                    </a>
+
+                    <a href="/contact" class="secondary-btn">
+                        Contact Me
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section><section class="stats">
+
+    <div class="stat-card">
+        <h2>3+</h2>
+        <p>Projects</p>
+    </div>
+
+    <div class="stat-card">
+        <h2>5+</h2>
+        <p>Technologies</p>
+    </div>
+
+    <div class="stat-card">
+        <h2>100%</h2>
+        <p>Learning Mindset</p>
+    </div>
+
+</section>
+
+
+    </main>
+
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
