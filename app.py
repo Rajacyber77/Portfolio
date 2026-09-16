@@ -47,10 +47,7 @@ os.makedirs(
 # ==================================================
 # MYSQL DATABASE CONNECTION
 # ==================================================
-
-
-    def get_db_connection():
-
+def get_db_connection():
     db = mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         port=int(os.getenv("DB_PORT", "3306")),
@@ -3845,142 +3842,13 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
 
             row["seat_number"] = regular_seat + offset
 
-        # ==========================================================
-        # ARREAR STUDENTS:
-        # Subject Code + Subject MUST come from arrear_timetable.
-        #
-        # ARREAR TT(2).xlsx structure:
-        #   COURSE | BATCH | DATE
-        #   BCA | 2026-2029 | 98B - CORE:COMPUTER APPLICATION
-        #
-        # Therefore for every arrear student we match:
-        #   COURSE + BATCH + EXAM DATE
-        # and read the exact timetable cell.
-        # ==========================================================
-
-        cursor.execute(
-            """
-            SELECT
-                id,
-                course,
-                batch,
-                exam_date,
-                subject_text,
-                subject_name
-            FROM arrear_timetable
-            WHERE exam_date = %s
-            ORDER BY id DESC
-            """,
-            (base_exam_date,)
-        )
-
-        arrear_tt_rows = cursor.fetchall()
-
-        # One timetable entry per Course + Batch + Exam Date.
-        # IMPORTANT:
-        # The uploaded ARREAR TT has:
-        #
-        #   Column 1 = COURSE
-        #   Column 2 = BATCH
-        #   Column 3+ = EXAM DATE
-        #
-        # The value inside the date cell is the ONLY source for:
-        #   Sub.Code + Subject
-        #
-        # Example:
-        #   98B - CORE:COMPUTER APPLICATION
-        #
-        # We therefore match ONLY Course + Batch + Exam Date.
-        # We do NOT require arrear_students.subject_name to match,
-        # because that value may contain a different representation.
-        arrear_tt_map = {}
-
-        for tt in arrear_tt_rows:
-            tt_course = normalize_course_for_match(
-                tt.get("course")
-            )
-
-            tt_batch = normalize_year_for_match(
-                tt.get("batch")
-            )
-
-            key = (
-                tt_course,
-                tt_batch
-            )
-
-            # Query is ORDER BY id DESC, so newest row wins.
-            if key in arrear_tt_map:
-                continue
-
-            raw_text = str(
-                tt.get("subject_text") or ""
-            ).strip()
-
-            # ALWAYS parse the actual timetable cell.
-            code, subject = _arrear_subject_parts(
-                raw_text
-            )
-
-            # subject_text is the exact Excel cell value.
-            # If it is somehow empty, use subject_name from
-            # arrear_timetable only (never arrear_students).
-            if not raw_text:
-                timetable_name = str(
-                    tt.get("subject_name") or ""
-                ).strip()
-
-                code, subject = _arrear_subject_parts(
-                    timetable_name
-                )
-
-            arrear_tt_map[key] = {
-                "subject_code": (
-                    code.strip()
-                    if code
-                    else "-"
-                ),
-                "subject": (
-                    subject.strip()
-                    if subject
-                    else "-"
-                )
-            }
-
         # Add Arrear students at the beginning of each hall.
         for ar in arrear_rows:
             hid = int(ar["hall_id"])
-
             try:
-                ar_seat = int(
-                    ar.get("seat_number") or 0
-                )
+                ar_seat = int(ar.get("seat_number") or 0)
             except (ValueError, TypeError):
                 ar_seat = 0
-
-            ar_course = str(
-                ar.get("course") or ""
-            ).strip()
-
-            ar_batch = str(
-                ar.get("batch") or ""
-            ).strip()
-
-            # Match the Arrear Timetable using the same
-            # Course + Batch normalization used while uploading
-            # the timetable.
-            tt_key = (
-                normalize_course_for_match(ar_course),
-                normalize_year_for_match(ar_batch)
-            )
-
-            tt_detail = arrear_tt_map.get(
-                tt_key,
-                {
-                    "subject_code": "-",
-                    "subject": "-"
-                }
-            )
 
             rows.append({
                 "exam_id": rows[0]["exam_id"],
@@ -3992,33 +3860,17 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
                 "session": rows[0].get("session"),
                 "register_number": ar.get("register_number") or "",
                 "name": ar.get("name") or "",
-                "course": ar_course or "ARREAR",
-                "year": ar_batch,
+                "course": ar.get("course") or "ARREAR",
+                "year": ar.get("batch") or "",
                 "hall_name": ar.get("hall_name") or "",
                 "seating_capacity": ar.get("seating_capacity") or 0,
                 "exam_date": base_exam_date,
                 "exam_type": base_exam_type,
                 "exam_name": base_exam_name,
-
-                # IMPORTANT:
-                # This is the Regular Seating Arrangement PDF.
-                # Arrear students are inserted into the same PDF.
-                #
-                # PDF column mapping:
-                #   row["subject_name"] = Sub.Code
-                #   row["subject"]      = Subject
-                #
-                # BOTH values come directly from the matching
-                # ARREAR TIMETABLE date-cell value.
-                "subject": tt_detail["subject"],
-                "subject_name": tt_detail["subject_code"],
-
+                "subject": "",
+                "subject_name": "",
                 "faculty_name": ar.get("faculty_name") or "",
                 "faculty_department": ar.get("faculty_department") or "",
-
-                # Marker used so the Regular timetable lookup below
-                # never overwrites Arrear timetable values.
-                "_is_arrear": True,
             })
 
         rows.sort(
@@ -4080,12 +3932,6 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
                 }
 
         for row in rows:
-
-            # NEVER replace Arrear subject values with Regular
-            # exam_timetable values.
-            if row.get("_is_arrear"):
-                continue
-
             key = (
                 normalize_course_for_match(row.get("course")),
                 normalize_year_for_match(row.get("year")),
@@ -4100,10 +3946,6 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
                     row["subject"] = detail["subject"]
                 if not str(row.get("subject_name") or "").strip():
                     row["subject_name"] = detail["subject_name"]
-
-        # Remove the internal marker before PDF generation.
-        for row in rows:
-            row.pop("_is_arrear", None)
 
         # ==================================================
         # PDF FILE NAME
@@ -13607,558 +13449,154 @@ def _build_arrear_hall_allotment_pdf(exam_date=None):
 
 
 def _build_arrear_seating_pdf(exam_date=None):
-    """Build Arrear Seating Arrangement PDF.
-
-    IMPORTANT:
-    Sub.Code and Subject are taken ONLY from arrear_timetable.
-    The arrear_students.subject_name value is used only to identify
-    the timetable row (normally it contains the subject code).
-    """
+    """Arrear seating PDF matching the uploaded Admin Seating Arrangement PDF."""
     from reportlab.lib.pagesizes import landscape
-
     d = _arrear_pdf_date(exam_date)
     if not d:
-        raise ValueError("No Arrear allotment available.")
+        raise ValueError('No Arrear allotment available.')
 
     db = get_db_connection()
     cur = db.cursor(dictionary=True, buffered=True)
-
     try:
-        # ==========================================================
-        # ARREAR TIMETABLE -> SUBJECT CODE + SUBJECT
-        #
-        # Example from ARREAR TT:
-        #   98B - CORE:COMPUTER APPLICATION
-        #
-        # PDF:
-        #   Sub.Code = 98B
-        #   Subject  = CORE:COMPUTER APPLICATION
-        #
-        # Match the student's stored subject value against the
-        # CODE / NAME / COMPLETE TEXT from arrear_timetable.
-        # Course + Batch + Exam Date are also mandatory.
-        # ==========================================================
         cur.execute("""
-            SELECT
-                aa.id,
-                aa.hall_id,
-                h.hall_name,
-                s.reg_no,
-                s.course,
-                s.batch,
-
-                /* Original value stored in Arrear Timetable */
-                t.subject_text AS timetable_subject_text,
-                t.subject_name AS timetable_subject_name,
-
-                /* Subject CODE = part before " - " */
-                COALESCE(
-                    NULLIF(
-                        TRIM(
-                            SUBSTRING_INDEX(
-                                TRIM(COALESCE(t.subject_text, '')),
-                                ' - ',
-                                1
-                            )
-                        ),
-                        ''
-                    ),
-                    '-'
-                ) AS subject_code,
-
-                /* Subject NAME = part after " - " */
-                COALESCE(
-                    NULLIF(
-                        TRIM(
-                            CASE
-                                WHEN INSTR(
-                                    TRIM(COALESCE(t.subject_text, '')),
-                                    ' - '
-                                ) > 0
-                                THEN SUBSTRING(
-                                    TRIM(COALESCE(t.subject_text, '')),
-                                    INSTR(
-                                        TRIM(COALESCE(t.subject_text, '')),
-                                        ' - '
-                                    ) + 3
-                                )
-                                ELSE TRIM(
-                                    COALESCE(t.subject_name, '')
-                                )
-                            END
-                        ),
-                        ''
-                    ),
-                    '-'
-                ) AS subject_display,
-
-                aa.seat_number,
-                aa.side
-
+            SELECT aa.id, aa.hall_id, h.hall_name,
+                   s.reg_no, s.course, s.batch,
+                   s.subject_name,
+                   COALESCE(t.subject_name, t.subject_text, '') AS subject,
+                   aa.seat_number, aa.side
             FROM arrear_allotments aa
-
-            INNER JOIN halls h
-                ON h.id = aa.hall_id
-
-            INNER JOIN arrear_students s
-                ON s.id = aa.student_id
-
-            INNER JOIN arrear_timetable t
-                ON LOWER(TRIM(t.course))
-                    = LOWER(TRIM(s.course))
-
-                AND LOWER(TRIM(t.batch))
-                    = LOWER(TRIM(s.batch))
-
-                AND t.exam_date = aa.exam_date
-
-                /* IMPORTANT:
-                   Student DB normally stores the Arrear subject CODE.
-                   Match that code with the code extracted from the
-                   Arrear Timetable cell.
-                */
-                AND (
-                    LOWER(TRIM(s.subject_name))
-                        = LOWER(TRIM(
-                            SUBSTRING_INDEX(
-                                TRIM(COALESCE(t.subject_text, '')),
-                                ' - ',
-                                1
-                            )
-                        ))
-
-                    OR LOWER(TRIM(s.subject_name))
-                        = LOWER(TRIM(t.subject_name))
-
-                    OR LOWER(TRIM(s.subject_name))
-                        = LOWER(TRIM(t.subject_text))
-                )
-
+            JOIN halls h ON h.id = aa.hall_id
+            JOIN arrear_students s ON s.id = aa.student_id
+            LEFT JOIN (
+                SELECT course, batch, exam_date,
+                       MAX(subject_name) AS subject_name,
+                       MAX(subject_text) AS subject_text
+                FROM arrear_timetable
+                WHERE exam_date = %s
+                GROUP BY course, batch, exam_date, subject_name
+            ) t ON LOWER(TRIM(t.course)) = LOWER(TRIM(s.course))
+              AND LOWER(TRIM(t.batch)) = LOWER(TRIM(s.batch))
+              AND t.exam_date = aa.exam_date
+              AND LOWER(TRIM(t.subject_name)) = LOWER(TRIM(s.subject_name))
             WHERE aa.exam_date = %s
-
-            ORDER BY
-                aa.hall_id,
-                aa.seat_number,
-                s.reg_no
-        """, (d,))
-
+            ORDER BY aa.hall_id, aa.seat_number, s.reg_no
+        """, (d, d))
         rows = cur.fetchall()
-
         if not rows:
-            raise ValueError(
-                f"No Arrear seating found for {d}."
-            )
+            raise ValueError(f'No Arrear seating found for {d}.')
 
-        # ==========================================================
-        # FINAL PDF VALUES
-        #
-        # These values are ALWAYS derived from arrear_timetable.
-        # No value from arrear_students is used for displaying
-        # Sub.Code or Subject.
-        # ==========================================================
-        for r in rows:
-            timetable_text = str(
-                r.get("timetable_subject_text") or ""
-            ).strip()
-
-            code, name = _arrear_subject_parts(timetable_text)
-
-            r["subject_code"] = code.strip() if code else "-"
-            r["subject_display"] = name.strip() if name else "-"
-
-        path = os.path.join(
-            UPLOAD_FOLDER,
-            f"Arrear_Student_Seating_{d}.pdf"
-        )
-
-        pdf = canvas.Canvas(
-            path,
-            pagesize=landscape(A4)
-        )
-
+        path = os.path.join(UPLOAD_FOLDER, f'Arrear_Student_Seating_{d}.pdf')
+        pdf = canvas.Canvas(path, pagesize=landscape(A4))
         width, height = landscape(A4)
 
-        # ==========================================================
-        # GROUP BY HALL
-        # ==========================================================
         halls = {}
-
         for r in rows:
-            halls.setdefault(
-                r["hall_id"],
-                []
-            ).append(r)
+            halls.setdefault(r['hall_id'], []).append(r)
 
         for hall_index, hall_rows in enumerate(halls.values()):
-
             first = hall_rows[0]
-
             if hall_index:
                 pdf.showPage()
 
-            # ======================================================
-            # HEADER
-            # ======================================================
-            pdf.setFont(
-                "Helvetica-Bold",
-                15
-            )
+            # Exact overall header arrangement from the uploaded seating PDF.
+            pdf.setFont('Helvetica-Bold', 15)
+            pdf.drawCentredString(width/2, height-35, 'HALL ALLOTMENT')
+            pdf.setFont('Helvetica-Bold', 9)
+            pdf.drawString(35, height-57, f"HALL NO: {first['hall_name']}")
 
-            pdf.drawCentredString(
-                width / 2,
-                height - 35,
-                "HALL ALLOTMENT"
-            )
-
-            pdf.setFont(
-                "Helvetica-Bold",
-                9
-            )
-
-            pdf.drawString(
-                35,
-                height - 57,
-                f"HALL NO: {first['hall_name']}"
-            )
-
-            # ======================================================
-            # COURSE / YEAR
-            # ======================================================
             course_years = []
             seen = set()
-
             for r in hall_rows:
-                text = (
-                    f"{str(r['course']).strip()} - "
-                    f"{str(r['batch']).strip()}"
-                )
-
+                text = f"{str(r['course']).strip()} - {str(r['batch']).strip()}"
                 if text.lower() not in seen:
                     seen.add(text.lower())
                     course_years.append(text)
+            pdf.setFont('Helvetica', 8)
+            pdf.drawString(35, height-80, f"Course / Year: {', '.join(course_years)}")
 
-            pdf.setFont(
-                "Helvetica",
-                8
-            )
-
-            pdf.drawString(
-                35,
-                height - 80,
-                f"Course / Year: {', '.join(course_years)}"
-            )
-
-            # ======================================================
-            # SEATING TABLE
-            # ======================================================
-            seats = sorted(
-                hall_rows,
-                key=lambda r: (
-                    r.get("seat_number") or 0,
-                    str(r.get("reg_no") or "")
-                )
-            )
-
+            # 6 vertical blocks: S.No | Reg. No, matching the supplied PDF.
+            seats = sorted(hall_rows, key=lambda r: (r.get('seat_number') or 0, str(r.get('reg_no') or '')))
             total = len(seats)
             blocks = 6
-
-            rows_per_block = (
-                total + blocks - 1
-            ) // blocks
-
+            rows_per_block = (total + blocks - 1) // blocks
+            # The supplied 34-seat layout uses 6 rows in each block.
             if total <= 34:
                 rows_per_block = 6
 
+            # Arrange seats sequentially down each vertical block.
             block_data = []
-
             for b in range(blocks):
-                start_i = (
-                    b * rows_per_block
-                )
-
-                block_data.append(
-                    seats[
-                        start_i:
-                        start_i + rows_per_block
-                    ]
-                )
+                start_i = b * rows_per_block
+                block_data.append(seats[start_i:start_i + rows_per_block])
 
             left = 15
             table_top = height - 105
             table_bottom = 205
-            table_h = (
-                table_top - table_bottom
-            )
-            rh = (
-                table_h / rows_per_block
-            )
-
+            table_h = table_top - table_bottom
+            rh = table_h / rows_per_block
             total_table_w = width - 30
-            pair_w = (
-                total_table_w / blocks
-            )
-
+            pair_w = total_table_w / blocks
             sno_w = pair_w * 0.46
             reg_w = pair_w - sno_w
 
-            pdf.setFont(
-                "Helvetica-Bold",
-                7.5
-            )
-
+            pdf.setFont('Helvetica-Bold', 7.5)
             for b in range(blocks):
+                x = left + b * pair_w
+                pdf.rect(x, table_bottom, sno_w, table_h)
+                pdf.rect(x+sno_w, table_bottom, reg_w, table_h)
+                pdf.drawCentredString(x+sno_w/2, table_top-11, 'S.No')
+                pdf.drawCentredString(x+sno_w+reg_w/2, table_top-11, 'Reg. No')
+                # horizontal row lines
+                for rr in range(1, rows_per_block+1):
+                    yy = table_top - rr*rh
+                    pdf.line(x, yy, x+pair_w, yy)
 
-                x = (
-                    left +
-                    b * pair_w
-                )
-
-                pdf.rect(
-                    x,
-                    table_bottom,
-                    sno_w,
-                    table_h
-                )
-
-                pdf.rect(
-                    x + sno_w,
-                    table_bottom,
-                    reg_w,
-                    table_h
-                )
-
-                pdf.drawCentredString(
-                    x + sno_w / 2,
-                    table_top - 11,
-                    "S.No"
-                )
-
-                pdf.drawCentredString(
-                    x + sno_w + reg_w / 2,
-                    table_top - 11,
-                    "Reg. No"
-                )
-
-                for rr in range(
-                    1,
-                    rows_per_block + 1
-                ):
-
-                    yy = (
-                        table_top -
-                        rr * rh
-                    )
-
-                    pdf.line(
-                        x,
-                        yy,
-                        x + pair_w,
-                        yy
-                    )
-
-            pdf.setFont(
-                "Helvetica",
-                7.2
-            )
-
-            for b, block in enumerate(
-                block_data
-            ):
-
-                x = (
-                    left +
-                    b * pair_w
-                )
-
-                for rr in range(
-                    rows_per_block
-                ):
-
-                    yy = (
-                        table_top -
-                        (rr + 1) * rh
-                    )
-
+            pdf.setFont('Helvetica', 7.2)
+            for b, block in enumerate(block_data):
+                x = left + b * pair_w
+                for rr in range(rows_per_block):
+                    yy = table_top - (rr+1)*rh
                     if rr < len(block):
-
                         r = block[rr]
+                        pdf.drawCentredString(x+sno_w/2, yy+rh/2-2, str(rr+1 + b*rows_per_block))
+                        pdf.drawCentredString(x+sno_w+reg_w/2, yy+rh/2-2, str(r['reg_no']))
 
-                        pdf.drawCentredString(
-                            x + sno_w / 2,
-                            yy + rh / 2 - 2,
-                            str(
-                                rr + 1 +
-                                b * rows_per_block
-                            )
-                        )
-
-                        pdf.drawCentredString(
-                            x + sno_w + reg_w / 2,
-                            yy + rh / 2 - 2,
-                            str(r["reg_no"])
-                        )
-
-            # ======================================================
-            # COURSE-WISE SUBJECT SUMMARY
-            # ======================================================
+            # Course-wise subject summary exactly below the seating table.
             summary_y = 185
+            pdf.setFont('Helvetica-Bold', 7.5)
+            summary_cols = [15, 220, 315, 610, width-15]
+            summary_headers = ['Course', 'Sub.Code', 'Subject', 'Strength']
+            for i, htxt in enumerate(summary_headers):
+                pdf.rect(summary_cols[i], summary_y-28, summary_cols[i+1]-summary_cols[i], 28)
+                pdf.drawCentredString((summary_cols[i]+summary_cols[i+1])/2, summary_y-18, htxt)
 
-            pdf.setFont(
-                "Helvetica-Bold",
-                7.5
-            )
-
-            summary_cols = [
-                15,
-                220,
-                315,
-                610,
-                width - 15
-            ]
-
-            summary_headers = [
-                "Course",
-                "Sub.Code",
-                "Subject",
-                "Strength"
-            ]
-
-            for i, htxt in enumerate(
-                summary_headers
-            ):
-
-                pdf.rect(
-                    summary_cols[i],
-                    summary_y - 28,
-                    summary_cols[i + 1]
-                    - summary_cols[i],
-                    28
-                )
-
-                pdf.drawCentredString(
-                    (
-                        summary_cols[i]
-                        +
-                        summary_cols[i + 1]
-                    ) / 2,
-                    summary_y - 18,
-                    htxt
-                )
-
-            # ======================================================
-            # SUMMARY
-            #
-            # Sub.Code and Subject are BOTH from arrear_timetable.
-            # ======================================================
+            # Group by course/batch/subject code.
             summary = []
             seen_sum = set()
-
             for r in hall_rows:
-
-                key = (
-                    str(r["course"]).strip(),
-                    str(r["batch"]).strip(),
-                    str(
-                        r["subject_code"]
-                    ).strip(),
-                    str(
-                        r["subject_display"]
-                    ).strip()
-                )
-
+                key = (str(r['course']).strip(), str(r['batch']).strip(), str(r['subject_name']).strip())
                 if key in seen_sum:
                     continue
-
                 seen_sum.add(key)
-
-                strength = sum(
-                    1
-                    for x in hall_rows
-                    if (
-                        str(x["course"]).strip(),
-                        str(x["batch"]).strip(),
-                        str(
-                            x["subject_code"]
-                        ).strip(),
-                        str(
-                            x["subject_display"]
-                        ).strip()
-                    ) == key
-                )
-
-                summary.append(
-                    (
-                        r["course"],
-                        r["batch"],
-                        r["subject_code"],
-                        r["subject_display"],
-                        strength
-                    )
-                )
+                strength = sum(1 for x in hall_rows if (str(x['course']).strip(), str(x['batch']).strip(), str(x['subject_name']).strip()) == key)
+                summary.append((r['course'], r['batch'], r['subject_name'], r['subject'] or '-', strength))
 
             sy = summary_y - 28
-
-            pdf.setFont(
-                "Helvetica",
-                7
-            )
-
-            for (
-                course,
-                batch,
-                code,
-                subject,
-                strength
-            ) in summary:
-
-                label = (
-                    f"{course} - {batch}"
-                )
-
-                vals = [
-                    label,
-                    code,
-                    subject,
-                    strength
-                ]
-
-                for i, value in enumerate(
-                    vals
-                ):
-
-                    x1 = summary_cols[i]
-                    x2 = summary_cols[i + 1]
-
-                    pdf.rect(
-                        x1,
-                        sy - 24,
-                        x2 - x1,
-                        24
-                    )
-
-                    pdf.drawCentredString(
-                        (x1 + x2) / 2,
-                        sy - 15,
-                        str(value)[:90]
-                    )
-
+            pdf.setFont('Helvetica', 7)
+            for course, batch, code, subject, strength in summary:
+                label = f'{course} - {batch}'
+                vals = [label, code, subject, strength]
+                for i, value in enumerate(vals):
+                    x1, x2 = summary_cols[i], summary_cols[i+1]
+                    pdf.rect(x1, sy-24, x2-x1, 24)
+                    pdf.drawCentredString((x1+x2)/2, sy-15, str(value)[:90])
                 sy -= 24
 
-            pdf.setFont(
-                "Helvetica",
-                7
-            )
-
-            pdf.drawCentredString(
-                width / 2,
-                20,
-                "College Examination Cell - Hall Allotment"
-            )
+            pdf.setFont('Helvetica', 7)
+            pdf.drawCentredString(width/2, 20, 'College Examination Cell - Hall Allotment')
 
         pdf.save()
-
         return path
-
     finally:
         cur.close()
         db.close()
@@ -14293,4 +13731,3 @@ if __name__ == "__main__":
         port=5000
     )
     
-Copy-Item ..\Hall_Allortment system\app.py .\app.py -Force
