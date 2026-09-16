@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Student Timetable</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+        }
+
+        .header {
+            background: #198754;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            color: #198754;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .student-details {
+            line-height: 2;
+            font-size: 16px;
+        }
+
+        .student-details strong {
+            display: inline-block;
+            width: 160px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: #198754;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        tr:hover {
+            background: #f0fdf4;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+
+        .back {
+            display: block;
+            width: 200px;
+            margin: 25px auto 0;
+            padding: 12px;
+            text-align: center;
+            background: #198754;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back:hover {
+            background: #146c43;
+        }
+
+        @media (max-width: 700px) {
+
+            table {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 8px;
+            }
+
+            .student-details strong {
+                width: 120px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+    <div class="header">
+
+        <h1>
+            Examination Timetable
+        </h1>
+
+        <p>
+            College Examination Cell
+        </p>
+
+    </div>
+
+
+    <div class="container">
+
+
+        <!-- STUDENT DETAILS -->
+
+        <div class="box">
+
+            <h2>
+                Student Details
+            </h2>
+
+            <div class="student-details">
+
+                <div>
+                    <strong>Register Number:</strong>
+                    {{ student.register_number }}
+                </div>
+
+                <div>
+                    <strong>Student Name:</strong>
+                    {{ student.name }}
+                </div>
+
+                <div>
+                    <strong>Department:</strong>
+                    {{ student.department }}
+                </div>
+
+                <div>
+                    <strong>Course:</strong>
+                    {{ student.course }}
+                </div>
+
+                <div>
+                    <strong>Year:</strong>
+                    {{ student.year }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- EXAM TIMETABLE -->
+
+        <div class="box">
+
+            <h2>
+                Examination Timetable
+            </h2>
+
+
+            {% if timetable %}
+
+            <table>
+
+                <tr>
+
+                    <th>
+                        Subject
+                    </th>
+
+                    <th>
+                        Exam Date
+                    </th>
+
+                    <th>
+                        Start Time
+                    </th>
+
+                    <th>
+                        End Time
+                    </th>
+
+                </tr>
+
+
+                {% for exam in timetable %}
+
+                <tr>
+
+                    <td>
+                        {{ exam.subject }}
+                    </td>
+
+                    <td>
+                        {{ exam.exam_date }}
+                    </td>
+
+                    <td>
+                        {{ exam.start_time }}
+                    </td>
+
+                    <td>
+                        {{ exam.end_time }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </table>
+
+
+            {% else %}
+
+            <div class="no-data">
+
+                No examination timetable available
+                for your Department / Course / Year.
+
+            </div>
+
+            {% endif %}
+
+
+            <a
+                href="{{ url_for('student_dashboard') }}"
+                class="back"
+            >
+                ← Back to Dashboard
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+</body>
+
+</html>

@@ -1,90 +1,460 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>E. Raja | Portfolio</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Hall Allotment System</title>
+
+
+    <style>
+
+        /* =========================================
+           RESET
+        ========================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        /* =========================================
+           BODY + BACKGROUND IMAGE
+        ========================================= */
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            color: #222;
+
+            background-image:
+                linear-gradient(
+                    rgba(0, 0, 0, 0.40),
+                    rgba(0, 0, 0, 0.40)
+                ),
+                url("/static/images/background.jpg");
+
+            background-size: cover;
+
+            background-position: center;
+
+            background-repeat: no-repeat;
+
+            background-attachment: fixed;
+
+            min-height: 100vh;
+        }
+
+
+        /* =========================================
+           HEADER
+        ========================================= */
+
+        header {
+
+            background: rgba(23, 59, 122, 0.92);
+
+            color: white;
+
+            padding: 20px 8%;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+
+        header h1 {
+
+            font-size: 24px;
+
+            margin-bottom: 5px;
+        }
+
+
+        header p {
+
+            font-size: 14px;
+
+            margin-top: 5px;
+        }
+
+
+        /* =========================================
+           NAVIGATION
+        ========================================= */
+
+        nav a {
+
+            color: white;
+
+            text-decoration: none;
+
+            margin-left: 25px;
+
+            font-weight: bold;
+        }
+
+
+        nav a:hover {
+
+            text-decoration: underline;
+        }
+
+
+        /* =========================================
+           HOME
+        ========================================= */
+
+        .home {
+
+            min-height: 75vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            text-align: center;
+
+            padding: 40px 20px;
+        }
+
+
+        .home-content {
+
+            max-width: 800px;
+
+            background:
+                rgba(255, 255, 255, 0.90);
+
+            padding: 45px;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+
+        /* =========================================
+           TITLE
+        ========================================= */
+
+        .home h2 {
+
+            font-size: 42px;
+
+            color: #173b7a;
+
+            margin-bottom: 20px;
+        }
+
+
+        /* =========================================
+           DESCRIPTION
+        ========================================= */
+
+        .home p {
+
+            color: #444;
+
+            font-size: 18px;
+
+            line-height: 1.6;
+
+            margin-bottom: 35px;
+        }
+
+
+        /* =========================================
+           LOGIN BUTTONS
+        ========================================= */
+
+        .buttons {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 20px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .buttons a {
+
+            text-decoration: none;
+
+            color: white;
+
+            padding: 15px 30px;
+
+            border-radius: 6px;
+
+            font-weight: bold;
+
+            transition:
+                0.2s;
+        }
+
+
+        /* ADMIN */
+
+        .admin {
+
+            background: #173b7a;
+        }
+
+
+        /* STUDENT */
+
+        .student {
+
+            background: #198754;
+        }
+
+
+        /* FACULTY */
+
+        .faculty {
+
+            background: #d97706;
+        }
+
+
+        .buttons a:hover {
+
+            opacity: 0.85;
+
+            transform: translateY(-3px);
+        }
+
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        footer {
+
+            background:
+                rgba(23, 59, 122, 0.92);
+
+            color: white;
+
+            text-align: center;
+
+            padding: 18px;
+
+            box-shadow:
+                0 -2px 8px rgba(0, 0, 0, 0.20);
+        }
+
+
+        footer p {
+
+            margin: 4px 0;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 600px) {
+
+            header {
+
+                flex-direction: column;
+
+                gap: 15px;
+
+                text-align: center;
+            }
+
+
+            nav a {
+
+                margin: 8px;
+            }
+
+
+            .home {
+
+                padding: 30px 15px;
+            }
+
+
+            .home-content {
+
+                padding: 30px 20px;
+            }
+
+
+            .home h2 {
+
+                font-size: 30px;
+            }
+
+
+            .home p {
+
+                font-size: 16px;
+            }
+
+
+            .buttons {
+
+                flex-direction: column;
+
+                align-items: center;
+            }
+
+
+            .buttons a {
+
+                width: 220px;
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-    <nav>
-        
 
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-            <a href="/skills">Skills</a>
-            <a href="/projects">Projects</a>
-            <a href="/contact">Contact</a>
+    <!-- =========================================
+         HEADER
+    ========================================= -->
+
+    <header>
+
+        <div>
+
+            <h1>
+                College Examination Cell
+            </h1>
+
+            <p>
+                Hall Allotment Management System
+            </p>
+
         </div>
-    </nav>
 
 
-    <main>
+        <nav>
 
-        <section class="hero">
+            <a href="/">
+                Home
+            </a>
 
-            <div class="hero-content">
+        </nav>
 
-                <p class="welcome">WELCOME TO MY PORTFOLIO</p>
+    </header>
 
-                <h1>
-                    Hi, I'm <span>E. Raja</span>
-                </h1>
 
-                <h2>
-                    Python Developer & Web Developer
-                </h2>
 
-                <p class="hero-text">
-                    I am a Computer Applications student passionate about
-                    Python, Web Development and Cyber Security.
-                    I enjoy building practical projects and learning new technologies.
-                </p>
+    <!-- =========================================
+         HOME SECTION
+    ========================================= -->
 
-                <div class="hero-buttons">
+    <section class="home">
 
-                    <a href="/projects" class="primary-btn">
-                        View My Projects
-                    </a>
+        <div class="home-content">
 
-                    <a href="/contact" class="secondary-btn">
-                        Contact Me
-                    </a>
+            <h2>
+                Hall Allotment System
+            </h2>
 
-                </div>
+
+            <p>
+
+                A centralized system for managing
+                examination halls, student seating,
+                faculty timetable and examination
+                activities.
+
+            </p>
+
+
+            <!-- LOGIN BUTTONS -->
+
+            <div class="buttons">
+
+
+                <a
+                    href="/admin-login"
+                    class="admin"
+                >
+                    🔐 Admin Login
+                </a>
+
+
+                <a
+                    href="/student-login"
+                    class="student"
+                >
+                    👨‍🎓 Student Login
+                </a>
+
+
+                <a
+                    href="/faculty-login"
+                    class="faculty"
+                >
+                    👨‍🏫 Faculty Login
+                </a>
+
 
             </div>
 
-        </section><section class="stats">
+        </div>
 
-    <div class="stat-card">
-        <h2>3+</h2>
-        <p>Projects</p>
-    </div>
-
-    <div class="stat-card">
-        <h2>5+</h2>
-        <p>Technologies</p>
-    </div>
-
-    <div class="stat-card">
-        <h2>100%</h2>
-        <p>Learning Mindset</p>
-    </div>
-
-</section>
+    </section>
 
 
-    </main>
 
+    <!-- =========================================
+         FOOTER
+    ========================================= -->
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <footer>
+
+        <p>
+            POWERD BY DEPARTMENT OF COMPUTER APPLICATION
+        </p>
+
+        <p>
+            Hall Allotment System
+        </p>
+
+    </footer>
+
 
 </body>
+
 </html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Attendance Submitted</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+    margin:0;
+    padding:40px
+}
+
+.card{
+    max-width:650px;
+    margin:60px auto;
+    background:#fff;
+    padding:40px;
+    border-radius:14px;
+    box-shadow:0 8px 25px rgba(0,0,0,.10);
+    text-align:center
+}
+
+h1{
+    color:#166534;
+    margin-bottom:15px
+}
+
+p{
+    font-size:17px;
+    color:#444;
+    line-height:1.6
+}
+
+.lock{
+    font-size:55px;
+    margin-bottom:15px
+}
+
+.btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:12px 24px;
+    border-radius:8px;
+    background:#333;
+    color:#fff;
+    text-decoration:none
+}
+
+.btn:hover{
+    background:#111
+}
+</style>
+
+<script>
+/* =========================================================
+   ATTENDANCE SUCCESS PAGE
+   Browser BACK -> Faculty Dashboard
+   ========================================================= */
+
+history.pushState(null, null, location.href);
+
+window.onpopstate = function () {
+    window.location.replace(
+        "{{ url_for('faculty_dashboard') }}"
+    );
+};
+
+/* Prevent page from being restored from browser cache */
+window.onpageshow = function(event) {
+    if (event.persisted) {
+        window.location.replace(
+            "{{ url_for('faculty_dashboard') }}"
+        );
+    }
+};
+</script>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="lock">🔒</div>
+
+    <h1>Attendance Submitted Successfully</h1>
+
+    <p>
+        Attendance has been submitted successfully.
+    </p>
+
+    <p>
+        <b>Ticked students = Absent</b><br>
+        <b>Unticked students = Present</b>
+    </p>
+
+    <p>
+        You cannot open or submit the attendance page again.
+    </p>
+
+    <a class="btn"
+       href="{{ url_for('faculty_dashboard') }}">
+        Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+</html>

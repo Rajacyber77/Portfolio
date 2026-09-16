@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Department Management</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        header {
+            background: #173b7a;
+            color: white;
+
+            padding: 20px 7%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .back {
+            color: white;
+            text-decoration: none;
+
+            border: 1px solid white;
+
+            padding: 9px 15px;
+
+            border-radius: 5px;
+        }
+
+        .back:hover {
+            background: white;
+            color: #173b7a;
+        }
+
+        .container {
+            max-width: 900px;
+
+            margin: 50px auto;
+
+            padding: 0 20px;
+        }
+
+        .title {
+            text-align: center;
+
+            color: #173b7a;
+
+            margin-bottom: 30px;
+        }
+
+        .upload-box {
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 10px;
+
+            border: 1px solid #ddd;
+
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+        }
+
+        .upload-box h2 {
+            color: #173b7a;
+
+            margin-bottom: 10px;
+        }
+
+        .upload-box p {
+            color: #666;
+
+            margin-bottom: 25px;
+
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 8px;
+
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+
+            border-color: #173b7a;
+        }
+
+        /* =========================
+           ADD BUTTON
+        ========================= */
+
+        .add-btn {
+            margin-top: 5px;
+
+            padding: 13px 30px;
+
+            border: none;
+
+            border-radius: 5px;
+
+            background: #173b7a;
+
+            color: white;
+
+            font-size: 15px;
+
+            cursor: pointer;
+        }
+
+        .add-btn:hover {
+            background: #102d5f;
+        }
+
+        /* =========================
+           SUCCESS MESSAGE
+        ========================= */
+
+        .success {
+            margin-top: 20px;
+
+            padding: 12px;
+
+            border-radius: 5px;
+
+            background: #e8f5e9;
+
+            color: #2e7d32;
+
+            font-weight: bold;
+        }
+
+        /* =========================
+           ERROR MESSAGE
+        ========================= */
+
+        .error {
+            margin-top: 20px;
+
+            padding: 12px;
+
+            border-radius: 5px;
+
+            background: #ffebee;
+
+            color: #c62828;
+
+            font-weight: bold;
+        }
+
+        /* =========================
+           DETAILS BOX
+        ========================= */
+
+        .format {
+            margin-top: 30px;
+
+            background: #eef3fa;
+
+            padding: 20px;
+
+            border-radius: 8px;
+        }
+
+        .format h3 {
+            color: #173b7a;
+
+            margin-bottom: 12px;
+        }
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            background: white;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+
+            padding: 12px;
+
+            text-align: center;
+        }
+
+        th {
+            background: #173b7a;
+
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fc;
+        }
+
+        /* =========================
+           DELETE BUTTON
+        ========================= */
+
+        .delete-btn {
+            background: #dc2626;
+
+            color: white;
+
+            border: none;
+
+            padding: 8px 14px;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            margin-top: 50px;
+
+            background: #173b7a;
+
+            color: white;
+
+            text-align: center;
+
+            padding: 18px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+            header {
+                flex-direction: column;
+
+                gap: 15px;
+
+                text-align: center;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 9px 5px;
+            }
+
+            .delete-btn {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     HEADER
+================================================== -->
+
+<header>
+
+    <div>
+
+        <h1>
+            Department Management
+        </h1>
+
+        <p>
+            College Examination Cell
+        </p>
+
+    </div>
+
+
+    <a
+        href="/admin-dashboard"
+        class="back"
+    >
+        ← Dashboard
+    </a>
+
+</header>
+
+
+<!-- ==================================================
+     MAIN CONTAINER
+================================================== -->
+
+<div class="container">
+
+
+    <h2 class="title">
+        Department & Course Management
+    </h2>
+
+
+    <div class="upload-box">
+
+
+        <!-- ==================================================
+             ADD DEPARTMENT + COURSE
+        ================================================== -->
+
+        <h2>
+            Add Department & Course
+        </h2>
+
+
+        <p>
+            Enter the department and course details
+            to save them in the database.
+        </p>
+
+
+        <form
+            method="POST"
+            action="/department-upload"
+        >
+
+
+            <!-- DEPARTMENT -->
+
+            <div class="input-group">
+
+                <label>
+                    Department Name
+                </label>
+
+                <input
+                    type="text"
+                    name="department_name"
+                    placeholder="Example: Computer Applications"
+                    required
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <!-- COURSE -->
+
+            <div class="input-group">
+
+                <label>
+                    Course Name
+                </label>
+
+                <input
+                    type="text"
+                    name="course_name"
+                    placeholder="Example: BCA"
+                    required
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <!-- ADD -->
+
+            <button
+                type="submit"
+                class="add-btn"
+            >
+                Add Department & Course
+            </button>
+
+
+        </form>
+
+
+        <!-- ==================================================
+             SUCCESS MESSAGE
+        ================================================== -->
+
+        {% if success %}
+
+        <div class="success">
+            {{ success }}
+        </div>
+
+        {% endif %}
+
+
+        <!-- ==================================================
+             ERROR MESSAGE
+        ================================================== -->
+
+        {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <!-- ==================================================
+             DEPARTMENT + COURSE DETAILS
+        ================================================== -->
+
+        <div class="format">
+
+
+            <h3>
+                Department & Course Details
+            </h3>
+
+
+            {% if departments %}
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            S.No
+                        </th>
+
+                        <th>
+                            Department
+                        </th>
+
+                        <th>
+                            Course
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for department in departments %}
+
+
+                    <tr>
+
+
+                        <!-- S.NO -->
+
+                        <td>
+                            {{ loop.index }}
+                        </td>
+
+
+                        <!-- DEPARTMENT -->
+
+                        <td>
+                            {{ department.department_name }}
+                        </td>
+
+
+                        <!-- COURSE -->
+
+                        <td>
+                            {{ department.course_name }}
+                        </td>
+
+
+                        <!-- DELETE -->
+
+                        <td>
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'delete_department_course',
+                                    department_id=department.id
+                                ) }}"
+                                onsubmit="return confirm(
+                                    'Delete this Department + Course?'
+                                );"
+                                style="margin:0;"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="delete-btn"
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+
+            {% else %}
+
+
+            <p>
+                No department or course added yet.
+            </p>
+
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- ==================================================
+     FOOTER
+================================================== -->
+
+<footer>
+
+    © 2026 College Examination Cell
+
+</footer>
+
+
+</body>
+
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hall Allotment</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        header {
+            background: #198754;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title h2 {
+            color: #198754;
+            margin-bottom: 8px;
+        }
+
+        .title p {
+            color: #666;
+        }
+
+        .allotment-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .allotment-card h3 {
+            color: #198754;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .detail-box {
+            background: #f0f8f4;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 4px solid #198754;
+        }
+
+        .label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .value {
+            display: block;
+            color: #222;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .important {
+            background: #e8f5ee;
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .important h3 {
+            color: #198754;
+            margin-bottom: 20px;
+        }
+
+        .hall-number {
+            font-size: 30px;
+            font-weight: bold;
+            color: #198754;
+            margin-bottom: 15px;
+        }
+
+        .seat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .pdf-btn {
+            display: block;
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            background: #dc2626;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .pdf-btn:hover {
+            background: #b91c1c;
+        }
+
+        .back-btn {
+            display: block;
+            width: 220px;
+            margin: 25px auto 0;
+            padding: 12px;
+            background: #333;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-btn:hover {
+            background: #222;
+        }
+
+        .no-data {
+            background: #fff7ed;
+            color: #92400e;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: 50px;
+            background: #198754;
+            color: white;
+            text-align: center;
+            padding: 18px;
+        }
+
+        @media (max-width: 650px) {
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .hall-number {
+                font-size: 25px;
+            }
+
+            .seat-number {
+                font-size: 21px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <h1>
+            Examination Hall Allotment
+        </h1>
+
+        <p>
+            College Examination Cell
+        </p>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <div class="container">
+
+
+        <!-- TITLE -->
+
+        <div class="title">
+
+            <h2>
+                Your Hall Allotment Details
+            </h2>
+
+            <p>
+                Check your examination hall and seat number
+            </p>
+
+        </div>
+
+
+        <!-- ALLOTMENT CARD -->
+
+        <div class="allotment-card">
+
+
+            {% if allotment %}
+
+
+            <h3>
+                Student Examination Details
+            </h3>
+
+
+            <!-- STUDENT / EXAM DETAILS -->
+
+            <div class="details">
+
+
+                <div class="detail-box">
+
+                    <span class="label">
+                        Register Number
+                    </span>
+
+                    <span class="value">
+                        {{ student.register_number }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="label">
+                        Student Name
+                    </span>
+
+                    <span class="value">
+                        {{ student.name }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="label">
+                        Course
+                    </span>
+
+                    <span class="value">
+                        {{ student.course }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="label">
+                        Year
+                    </span>
+
+                    <span class="value">
+                        {{ student.year }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="label">
+                        Subject
+                    </span>
+
+                    <span class="value">
+                        {{ allotment.subject }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="label">
+                        Exam Date
+                    </span>
+
+                    <span class="value">
+                        {{ allotment.exam_date }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-box">
+
+                    <span class="label">
+                        Exam Time
+                    </span>
+
+                    <span class="value">
+                        {{ allotment.exam_time }}
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- HALL / SEAT -->
+
+            <div class="important">
+
+                <h3>
+                    🏫 Your Allotment
+                </h3>
+
+
+                <div class="hall-number">
+
+                    Hall Number:
+                    {{ allotment.hall_number }}
+
+                </div>
+
+
+                <div class="seat-number">
+
+                    💺 Seat Number:
+                    {{ allotment.seat_number }}
+
+                </div>
+
+            </div>
+
+
+            <!-- PDF DOWNLOAD -->
+
+            <a
+                href="{{ url_for('student_hall_pdf') }}"
+                class="pdf-btn"
+            >
+                📄 Download Hall Allotment PDF
+            </a>
+
+
+            {% else %}
+
+
+            <!-- NO ALLOTMENT -->
+
+            <div class="no-data">
+
+                Hall allotment has not been assigned yet.
+
+                <br><br>
+
+                Please contact the Examination Cell.
+
+            </div>
+
+
+            {% endif %}
+
+
+            <!-- BACK -->
+
+            <a
+                href="{{ url_for('student_dashboard') }}"
+                class="back-btn"
+            >
+                ← Back to Student Dashboard
+            </a>
+
+
+        </div>
+
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            © 2026 College Examination Cell
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

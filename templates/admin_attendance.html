@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Exam Hall Attendance - Admin</title>
+
+<style>
+
+/* ==================================================
+   BODY
+   ================================================== */
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+    margin:0;
+    padding:25px;
+    color:#222;
+}
+
+
+/* ==================================================
+   MAIN CONTAINER
+   ================================================== */
+
+.wrap{
+    max-width:1400px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 4px 18px rgba(0,0,0,.08);
+}
+
+
+/* ==================================================
+   MAIN HEADING
+   ================================================== */
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+
+/* ==================================================
+   PDF BUTTONS
+   ================================================== */
+
+.actions{
+    text-align:center;
+    margin:20px 0 35px;
+}
+
+.btn{
+    display:inline-block;
+    padding:14px 25px;
+    margin:8px;
+    color:#fff !important;
+    text-decoration:none;
+    border-radius:8px;
+    font-weight:bold;
+    font-size:17px;
+}
+
+.present-btn{
+    background:#16a34a !important;
+}
+
+.present-btn:hover{
+    background:#15803d !important;
+}
+
+.absent-btn{
+    background:#dc2626 !important;
+}
+
+.absent-btn:hover{
+    background:#b91c1c !important;
+}
+
+
+/* ==================================================
+   COURSE + YEAR SECTION
+   ================================================== */
+
+.course-year{
+    margin-top:30px;
+    margin-bottom:35px;
+
+    border:1px solid #ddd;
+    border-radius:10px;
+
+    padding:15px;
+
+    background:#fff;
+}
+
+
+/* ==================================================
+   COURSE + YEAR HEADING
+   ================================================== */
+
+.course-year h2{
+    background:#222;
+    color:#fff;
+
+    padding:12px 16px;
+
+    border-radius:8px;
+
+    text-align:center;
+
+    margin-top:0;
+    margin-bottom:15px;
+
+    font-size:21px;
+}
+
+
+/* ==================================================
+   COURSE/YEAR INFO
+   ================================================== */
+
+.course-info{
+    text-align:center;
+
+    margin:8px 0 15px;
+
+    color:#444;
+
+    font-size:16px;
+}
+
+
+/* ==================================================
+   TABLE
+   ================================================== */
+
+table{
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:12px;
+}
+
+th,
+td{
+    border:1px solid #ddd;
+
+    padding:9px;
+
+    text-align:left;
+
+    vertical-align:middle;
+}
+
+th{
+    background:#eef1f6;
+
+    font-weight:bold;
+}
+
+
+/* ==================================================
+   SUBJECT
+   ================================================== */
+
+td.subject{
+    white-space:normal;
+
+    word-break:break-word;
+
+    line-height:1.35;
+}
+
+
+/* ==================================================
+   HALL
+   ================================================== */
+
+td.hall-name{
+    font-weight:bold;
+
+    white-space:nowrap;
+}
+
+
+/* ==================================================
+   PRESENT
+   ================================================== */
+
+.present{
+    color:#166534;
+
+    font-weight:bold;
+}
+
+
+/* ==================================================
+   ABSENT
+   ================================================== */
+
+.absent{
+    color:#b91c1c;
+
+    font-weight:bold;
+}
+
+
+/* ==================================================
+   NOT MARKED
+   ================================================== */
+
+.not-marked{
+    color:#777;
+
+    font-weight:bold;
+}
+
+
+/* ==================================================
+   TOTAL
+   ================================================== */
+
+.total-info{
+    text-align:right;
+
+    margin-top:10px;
+
+    font-weight:bold;
+
+    color:#444;
+}
+
+
+.close-all-btn{
+    background:#b91c1c !important;
+}
+
+.close-all-btn:hover{
+    background:#991b1b !important;
+}
+
+.close-hall-btn{
+    display:inline-block;
+    padding:8px 14px;
+    background:#dc2626;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.close-hall-btn:hover{
+    background:#b91c1c;
+}
+
+.pending-actions{
+    text-align:center;
+    margin-bottom:18px;
+}
+
+.pending-note{
+    text-align:center;
+    color:#555;
+    margin-bottom:15px;
+}
+
+
+.closed-halls{
+    margin-top:20px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:15px;
+    background:#fff7f7;
+}
+
+.closed-halls h2{
+    background:#7f1d1d;
+    color:#fff;
+    padding:12px 16px;
+    border-radius:8px;
+    text-align:center;
+    margin-top:0;
+    margin-bottom:15px;
+    font-size:21px;
+}
+
+.open-hall-btn{
+    display:inline-block;
+    padding:8px 14px;
+    background:#16a34a;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.open-hall-btn:hover{
+    background:#15803d;
+}
+
+/* ==================================================
+   MOBILE
+   ================================================== */
+
+@media(max-width:900px){
+
+    body{
+        padding:10px;
+    }
+
+    .wrap{
+        padding:15px;
+
+        overflow-x:auto;
+    }
+
+    table{
+        min-width:1000px;
+    }
+
+    .btn{
+        display:block;
+
+        max-width:320px;
+
+        margin:10px auto;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="wrap">
+
+
+<!-- ==================================================
+     PAGE HEADING
+     ================================================== -->
+
+<h1>
+    Exam Hall Attendance
+</h1>
+
+
+<!-- ==================================================
+     PDF BUTTONS
+     ================================================== -->
+
+<div class="actions">
+
+    <a
+        class="btn present-btn"
+        href="{{ url_for('admin_attendance_pdf', status='present') }}"
+    >
+        📄 Present Students PDF
+    </a>
+
+
+    <a
+        class="btn absent-btn"
+        href="{{ url_for('admin_attendance_pdf', status='absent') }}"
+    >
+        📄 Absent Students PDF
+    </a>
+
+</div>
+
+
+<!-- ==================================================
+     HALLS WITH ATTENDANCE NOT SUBMITTED
+     ================================================== -->
+
+{% if pending_halls %}
+<div class="course-year">
+
+    <h2>Attendance Not Submitted</h2>
+
+    <div class="pending-actions">
+        <form
+            method="POST"
+            action="{{ url_for('admin_attendance_close_all') }}"
+            onsubmit="return confirm('Close attendance for all pending halls?');"
+            style="display:inline;"
+        >
+            <button type="submit" class="btn close-all-btn">
+                🔒 Close All Attendance
+            </button>
+        </form>
+    </div>
+
+    <div class="pending-note">
+        Only attendance-not-submitted halls are shown here.
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Hall</th>
+                <th>Faculty Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for hall in pending_halls %}
+            <tr>
+                <td class="hall-name">{{ hall.hall_name }}</td>
+
+                <td>
+                    {{ hall.faculty_name or '-' }}
+                </td>
+
+                <td>
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin_attendance_close',
+                            hall_id=hall.hall_id,
+                            exam_id=hall.exam_id
+                        ) }}"
+                        onsubmit="return confirm('Close attendance for {{ hall.hall_name }}?');"
+                        style="display:inline;"
+                    >
+                        <button type="submit" class="close-hall-btn">
+                            🔒 Close Attendance
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endif %}
+
+
+<!-- ==================================================
+     HALLS CLOSED BY ADMIN
+     ================================================== -->
+
+{% if closed_halls %}
+<div class="closed-halls">
+
+    <h2>🔒 Attendance Closed by Admin</h2>
+
+    <div class="pending-note">
+        These halls are currently closed. Faculty cannot submit attendance until Admin opens the hall.
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Hall</th>
+                <th>Faculty Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for hall in closed_halls %}
+            <tr>
+                <td class="hall-name">{{ hall.hall_name }}</td>
+                <td>{{ hall.faculty_name or '-' }}</td>
+                <td>
+                    <form
+                        method="POST"
+                        action="{{ url_for('admin_attendance_open', hall_id=hall.hall_id, exam_id=hall.exam_id) }}"
+                        onsubmit="return confirm('Open attendance for {{ hall.hall_name }}?');"
+                        style="display:inline;"
+                    >
+                        <button type="submit" class="open-hall-btn">
+                            🔓 Open Attendance
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endif %}
+
+
+<!-- ==================================================
+     COURSE + YEAR WISE DATA
+     ================================================== -->
+
+{% if grouped %}
+
+
+    {% for course_year, course_rows in grouped.items() %}
+
+
+        {% set course = course_year[0] %}
+
+        {% set year = course_year[1] %}
+
+
+        <!-- ==================================================
+             COURSE + YEAR SECTION
+             ================================================== -->
+
+        <div class="course-year">
+
+
+            <!-- ==================================================
+                 COURSE + YEAR HEADING
+                 ================================================== -->
+
+            <h2>
+
+                COURSE:
+                {{ course }}
+
+                &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                YEAR:
+                {{ year }}
+
+            </h2>
+
+
+            <!-- ==================================================
+                 COURSE/YEAR TOTAL
+                 ================================================== -->
+
+            <div class="course-info">
+
+                <b>
+                    Total Students:
+                </b>
+
+                {{ course_rows|length }}
+
+            </div>
+
+
+            <!-- ==================================================
+                 STUDENT TABLE
+                 ================================================== -->
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Hall
+                        </th>
+
+                        <th>
+                            Reg No
+                        </th>
+
+                        <th>
+                            Student Name
+                        </th>
+
+                        <th>
+                            Department
+                        </th>
+
+                        <th>
+                            Subject
+                        </th>
+
+                        <th>
+                            Seat No
+                        </th>
+
+                        <th>
+                            Attendance
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% for row in course_rows %}
+
+
+                    <tr>
+
+
+                        <!-- ======================================
+                             HALL
+                             ====================================== -->
+
+                        <td class="hall-name">
+
+                            {{ row.hall_name }}
+
+                        </td>
+
+
+                        <!-- ======================================
+                             REGISTER NUMBER
+                             ====================================== -->
+
+                        <td>
+
+                            {{ row.register_number }}
+
+                        </td>
+
+
+                        <!-- ======================================
+                             STUDENT NAME
+                             ====================================== -->
+
+                        <td>
+
+                            {{ row.student_name }}
+
+                        </td>
+
+
+                        <!-- ======================================
+                             DEPARTMENT
+                             ====================================== -->
+
+                        <td>
+
+                            {{ row.department }}
+
+                        </td>
+
+
+                        <!-- ======================================
+                             SUBJECT
+                             ====================================== -->
+
+                        <td class="subject">
+
+                            {{ row.subject }}
+
+                        </td>
+
+
+                        <!-- ======================================
+                             SEAT NUMBER
+                             ====================================== -->
+
+                        <td>
+
+                            {{ row.seat_number }}
+
+                        </td>
+
+
+                        <!-- ======================================
+                             ATTENDANCE
+                             ====================================== -->
+
+                        <td>
+
+
+                            {% if
+                                row.attendance_status|lower
+                                == 'present'
+                            %}
+
+
+                                <span class="present">
+
+                                    ✓ Present
+
+                                </span>
+
+
+                            {% elif
+                                row.attendance_status|lower
+                                == 'absent'
+                            %}
+
+
+                                <span class="absent">
+
+                                    ✗ Absent
+
+                                </span>
+
+
+                            {% else %}
+
+
+                                <span class="not-marked">
+
+                                    Not Marked
+
+                                </span>
+
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+            <!-- ==================================================
+                 TOTAL
+                 ================================================== -->
+
+            <div class="total-info">
+
+                Total Students:
+                {{ course_rows|length }}
+
+            </div>
+
+
+        </div>
+
+
+    {% endfor %}
+
+
+{% else %}
+
+
+    <!-- ==================================================
+         NO DATA
+         ================================================== -->
+
+    <p style="text-align:center;">
+
+        No attendance records found.
+
+    </p>
+
+
+{% endif %}
+
+
+</div>
+
+
+</body>
+
+</html>

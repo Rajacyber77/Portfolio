@@ -1,0 +1,3880 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hall Allotment | College Examination Cell</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f9;
+
+            color: #222;
+
+        }
+
+
+        /* =========================================
+           HEADER
+        ========================================== */
+
+        .header {
+
+            background: #1f3c88;
+
+            color: white;
+
+            padding: 22px 35px;
+
+            text-align: center;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0,0,0,0.15);
+
+        }
+
+
+        .header h1 {
+
+            font-size: 28px;
+
+            margin-bottom: 6px;
+
+        }
+
+
+        .header p {
+
+            font-size: 14px;
+
+            opacity: 0.9;
+
+        }
+
+
+        /* =========================================
+           CONTAINER
+        ========================================== */
+
+        .container {
+
+            width: 94%;
+
+            max-width: 1400px;
+
+            margin: 30px auto;
+
+        }
+
+
+        /* =========================================
+           CARD
+        ========================================== */
+
+        .card {
+
+            background: white;
+
+            border-radius: 12px;
+
+            padding: 28px;
+
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0,0,0,0.08);
+
+        }
+
+
+        .card-title {
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+            color: #1f3c88;
+
+            margin-bottom: 22px;
+
+            border-bottom:
+                2px solid #e8ecf5;
+
+            padding-bottom: 12px;
+
+        }
+
+
+        /* =========================================
+           FORM GRID
+        ========================================== */
+
+        .form-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 20px;
+
+        }
+
+
+        .form-group {
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        .form-group label {
+
+            font-weight: 600;
+
+            margin-bottom: 8px;
+
+            color: #333;
+
+        }
+
+
+        select {
+
+            width: 100%;
+
+            padding: 12px 14px;
+
+            border:
+                1px solid #ccd3df;
+
+            border-radius: 7px;
+
+            font-size: 14px;
+
+            background: white;
+
+            outline: none;
+
+        }
+
+
+        select:focus {
+
+            border-color: #1f3c88;
+
+            box-shadow:
+                0 0 0 2px
+                rgba(31,60,136,0.1);
+
+        }
+
+
+        /* =========================================
+           EXAM DETAILS
+        ========================================== */
+
+        .exam-details {
+
+            margin-top: 25px;
+
+            background: #f7f9ff;
+
+            border:
+                1px solid #dce4f7;
+
+            border-radius: 10px;
+
+            padding: 20px;
+
+        }
+
+
+        .exam-details h3 {
+
+            color: #1f3c88;
+
+            margin-bottom: 16px;
+
+        }
+
+
+        .detail-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+
+        }
+
+
+        .detail-box {
+
+            background: white;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            border:
+                1px solid #e2e6ef;
+
+        }
+
+
+        .detail-box label {
+
+            display: block;
+
+            font-size: 12px;
+
+            color: #777;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .detail-box span {
+
+            font-weight: bold;
+
+            color: #222;
+
+        }
+
+
+        /* =========================================
+           COURSE SECTION
+        ========================================== */
+
+        .section {
+
+            margin-top: 30px;
+
+        }
+
+
+        .section h3 {
+
+            color: #1f3c88;
+
+            margin-bottom: 8px;
+
+            font-size: 19px;
+
+        }
+
+
+        .hint {
+
+            color: #777;
+
+            font-size: 13px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        /* =========================================
+           DATE COURSE LIST
+        ========================================== */
+
+        #dateCoursesSection {
+
+            display: none;
+
+        }
+
+
+        .course-list {
+
+            border:
+                1px solid #dce1ea;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+        }
+
+
+        .course-list-header {
+
+            display: grid;
+
+            grid-template-columns:
+                50px
+                1.2fr
+                0.8fr
+                1fr
+                2fr;
+
+            gap: 10px;
+
+            padding: 13px 15px;
+
+            background: #1f3c88;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+        }
+
+
+        .course-row {
+
+            display: grid;
+
+            grid-template-columns:
+                50px
+                1.2fr
+                0.8fr
+                1fr
+                2fr;
+
+            gap: 10px;
+
+            align-items: center;
+
+            padding: 14px 15px;
+
+            border-bottom:
+                1px solid #e8ebf0;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+
+        }
+
+
+        .course-row:last-child {
+
+            border-bottom: none;
+
+        }
+
+
+        .course-row:hover {
+
+            background: #f7f9ff;
+
+        }
+
+
+        .course-row input {
+
+            width: 18px;
+
+            height: 18px;
+
+            cursor: pointer;
+
+        }
+
+
+        .course-name {
+
+            font-weight: bold;
+
+        }
+
+
+        .course-year {
+
+            color: #555;
+
+        }
+
+
+        .subject-code {
+
+            font-weight: bold;
+
+            color: #1f3c88;
+
+        }
+
+
+        .subject-name {
+
+            color: #444;
+
+        }
+
+
+        .no-course {
+
+            padding: 25px;
+
+            text-align: center;
+
+            color: #777;
+
+        }
+
+
+        /* =========================================
+           SELECT ALL
+        ========================================== */
+
+        .select-all-area {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .select-all-area input {
+
+            width: 18px;
+
+            height: 18px;
+
+            cursor: pointer;
+
+        }
+
+
+        .select-all-area label {
+
+            margin: 0;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            color: #1f3c88;
+
+        }
+
+
+        /* =========================================
+           SEATING MODE
+        ========================================== */
+
+        .radio-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 15px;
+
+        }
+
+
+        .radio-card {
+
+            border:
+                1px solid #d7dce5;
+
+            border-radius: 9px;
+
+            padding: 18px;
+
+            cursor: pointer;
+
+            background: white;
+
+        }
+
+
+        .radio-card:hover {
+
+            border-color: #1f3c88;
+
+            background: #f7f9ff;
+
+        }
+
+
+        .radio-card input {
+
+            margin-right: 8px;
+
+        }
+
+
+        .radio-title {
+
+            font-weight: bold;
+
+        }
+
+
+        .radio-description {
+
+            display: block;
+
+            margin-top: 7px;
+
+            margin-left: 22px;
+
+            font-size: 12px;
+
+            color: #777;
+
+        }
+
+
+        /* =========================================
+           HALL GRID
+        ========================================== */
+
+        .hall-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+
+        }
+
+
+        .hall-card {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 16px;
+
+            border:
+                1px solid #d7dce5;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            background: white;
+
+        }
+
+
+        .hall-card:hover {
+
+            border-color: #1f3c88;
+
+            background: #f7f9ff;
+
+        }
+
+
+        .hall-card input {
+
+            width: 18px;
+
+            height: 18px;
+
+        }
+
+
+        .hall-info strong {
+
+            display: block;
+
+            margin-bottom: 4px;
+
+        }
+
+
+        .hall-info span {
+
+            font-size: 12px;
+
+            color: #777;
+
+        }
+
+
+        /* =========================================
+           FLOOR-WISE HALLS
+        ========================================== */
+
+        .floor-section {
+            margin-bottom: 22px;
+            border: 1px solid #dce2ec;
+            border-radius: 10px;
+            padding: 16px;
+            background: #f9fbff;
+        }
+
+        .floor-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f3c88;
+            margin-bottom: 14px;
+            padding-bottom: 9px;
+            border-bottom: 1px solid #dce2ec;
+        }
+
+        /* =========================================
+           FACULTY
+        ========================================== */
+
+        .faculty-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+
+        }
+
+
+        .faculty-card {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 13px;
+
+            border:
+                1px solid #d7dce5;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+        }
+
+
+        .faculty-card:hover {
+
+            border-color: #1f3c88;
+
+            background: #f7f9ff;
+
+        }
+
+
+        .faculty-card input {
+
+            width: 17px;
+
+            height: 17px;
+
+        }
+
+
+        /* =========================================
+           GENERATE BUTTON
+        ========================================== */
+
+        .button-area {
+
+            margin-top: 30px;
+
+            text-align: center;
+
+        }
+
+
+        .generate-btn {
+
+            border: none;
+
+            background: #1f3c88;
+
+            color: white;
+
+            padding: 14px 35px;
+
+            border-radius: 8px;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        .generate-btn:hover {
+
+            background: #162d69;
+
+        }
+
+
+        .generate-btn:disabled {
+
+            background: #999;
+
+            cursor: not-allowed;
+
+        }
+
+
+        /* =========================================
+           ALERT
+        ========================================== */
+
+        .alert {
+
+            padding: 14px 18px;
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+            font-size: 14px;
+
+        }
+
+
+        .success {
+
+            background: #e7f7ed;
+
+            color: #146c35;
+
+            border:
+                1px solid #b9e4c8;
+
+        }
+
+
+        .error {
+
+            background: #fdeaea;
+
+            color: #a32929;
+
+            border:
+                1px solid #f1bcbc;
+
+        }
+
+
+        /* =========================================
+           GENERATED ALLOTMENT
+        ========================================== */
+
+        .allotment-card {
+
+            border:
+                1px solid #d9dee8;
+
+            border-radius: 10px;
+
+            margin-bottom: 25px;
+
+            overflow: hidden;
+
+            background: white;
+
+        }
+
+
+        .allotment-header {
+
+            background: #1f3c88;
+
+            color: white;
+
+            padding: 15px 18px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+
+        .table-wrapper {
+
+            overflow-x: auto;
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+        }
+
+
+        th,
+        td {
+
+            padding: 12px 10px;
+
+            border-bottom:
+                1px solid #e5e8ee;
+
+            text-align: left;
+
+            font-size: 13px;
+
+        }
+
+
+        th {
+
+            background: #f3f5fa;
+
+            font-weight: bold;
+
+        }
+
+
+        .actions {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 12px;
+
+            margin-top: 20px;
+
+        }
+
+
+        .btn {
+
+            display: inline-block;
+
+            padding: 11px 17px;
+
+            border-radius: 7px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+        }
+
+
+        .pdf-btn {
+
+            background: #1f3c88;
+
+            color: white;
+
+        }
+
+
+        .change-btn {
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .delete-btn {
+
+            background: #dc3545;
+
+            color: white;
+
+            text-decoration: none;
+
+            padding: 7px 11px;
+
+            border-radius: 5px;
+
+            font-size: 12px;
+
+        }
+
+
+        .delete-all-btn {
+
+            background: #8b1e2d;
+
+            color: white;
+
+        }
+
+
+        .empty-message {
+
+            text-align: center;
+
+            padding: 35px;
+
+            color: #777;
+
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================== */
+
+
+        .change-option-group {
+            justify-content: flex-start;
+        }
+
+        .change-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #ccd3df;
+            border-radius: 7px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .change-toggle input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1000px) {
+
+            .form-grid {
+
+                grid-template-columns:
+                    1fr 1fr;
+
+            }
+
+
+            .detail-grid {
+
+                grid-template-columns:
+                    1fr 1fr;
+
+            }
+
+
+            .hall-grid {
+
+                grid-template-columns:
+                    1fr 1fr;
+
+            }
+
+
+            .faculty-grid {
+
+                grid-template-columns:
+                    1fr 1fr;
+
+            }
+
+        }
+
+
+        @media (max-width: 700px) {
+
+            .form-grid,
+            .radio-grid,
+            .hall-grid,
+            .faculty-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .course-list-header,
+            .course-row {
+
+                grid-template-columns:
+                    40px
+                    1fr
+                    1fr;
+
+            }
+
+
+            .course-list-header div:nth-child(4),
+            .course-list-header div:nth-child(5),
+
+            .course-row .subject-code,
+            .course-row .subject-name {
+
+                display: none;
+
+            }
+
+        }
+
+    
+        /* Floor-level checkbox */
+        .floor-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .floor-check-label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .floor-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #2563eb;
+        }
+
+        .floor-checkmark {
+            display: none;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     HEADER
+================================================== -->
+
+<header class="header">
+
+    <h1>
+        COLLEGE EXAMINATION CELL
+    </h1>
+
+    <p>
+        Hall Allotment Management System
+    </p>
+
+</header>
+
+
+
+<div class="container">
+
+
+    <!-- ==================================================
+         SUCCESS
+    ================================================== -->
+
+    {% if success %}
+
+        <div class="alert success">
+
+            {{ success }}
+
+        </div>
+
+    {% endif %}
+
+
+
+    <!-- ==================================================
+         ERROR
+    ================================================== -->
+
+    {% if error %}
+
+        <div class="alert error">
+
+            {{ error }}
+
+        </div>
+
+    {% endif %}
+
+
+
+    <!-- ==================================================
+         MAIN CARD
+    ================================================== -->
+
+    <div class="card">
+
+
+        <div class="card-title">
+
+            Generate Hall Allotment
+
+        </div>
+
+
+
+        <form
+
+            action="{{ url_for('generate_hall_allotment') }}"
+
+            method="POST"
+
+            id="hallAllotmentForm">
+
+
+            <!-- ==================================================
+                 EXAM TYPE / NAME / DATE
+            ================================================== -->
+
+            <div class="form-grid">
+
+
+                <!-- EXAM TYPE -->
+
+                <div class="form-group">
+
+                    <label for="examType">
+
+                        Exam Type
+
+                    </label>
+
+
+                    <select
+
+                        id="examType"
+
+                        name="exam_type"
+
+                        required>
+
+
+                        <option value="">
+
+                            Select Exam Type
+
+                        </option>
+
+
+                        {% set exam_types = [] %}
+
+
+                        {% for item in timetable_rows %}
+
+
+                            {% if item.exam_type
+                                  and item.exam_type not in exam_types %}
+
+
+                                {% set _ =
+                                    exam_types.append(
+                                        item.exam_type
+                                    )
+                                %}
+
+
+                                <option
+                                    value="{{ item.exam_type }}">
+
+                                    {{ item.exam_type }}
+
+                                </option>
+
+
+                            {% endif %}
+
+
+                        {% endfor %}
+
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- EXAM NAME -->
+
+                <div class="form-group">
+
+                    <label for="examName">
+
+                        Exam Name
+
+                    </label>
+
+
+                    <select
+
+                        id="examName"
+
+                        name="exam_name"
+
+                        required>
+
+
+                        <option value="">
+
+                            Select Exam Name
+
+                        </option>
+
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- EXAM DATE -->
+
+                <div class="form-group">
+
+                    <label for="examDate">
+
+                        Exam Date
+
+                    </label>
+
+
+                    <select
+
+                        id="examDate"
+
+                        name="morning_exam_date"
+
+                        required>
+
+
+                        <option value="">
+
+                            Select Exam Date
+
+                        </option>
+
+
+                    </select>
+
+                </div>
+
+                <!-- SESSION -->
+                <div class="form-group">
+                    <label for="session">Session</label>
+                    <select id="session" name="session" required>
+                        <option value="">Select Session</option>
+                        <option value="FORENOON">Forenoon</option>
+                        <option value="AFTERNOON">Afternoon</option>
+                    </select>
+                </div>
+
+                <!-- CHANGE OPTION -->
+                <div class="form-group change-option-group">
+                    <label for="changeMode">Change</label>
+                    <label class="change-toggle">
+                        <input type="checkbox" id="changeMode" name="change_mode" value="1">
+                        <span>Avoid previous day's hall</span>
+                    </label>
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 SELECTED DATE INFO
+            ================================================== -->
+
+            <div
+
+                class="exam-details"
+
+                id="examDetails"
+
+                style="display:none;">
+
+
+                <h3>
+
+                    Selected Exam Date
+
+                </h3>
+
+
+                <div class="detail-grid">
+
+
+                    <div class="detail-box">
+
+                        <label>
+                            Exam Date
+                        </label>
+
+                        <span id="selectedDate">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <label>
+                            Total Courses
+                        </label>
+
+                        <span id="selectedCourseCount">
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <label>
+                            Exam Name
+                        </label>
+
+                        <span id="selectedExamName">
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <label>
+                            Exam Type
+                        </label>
+
+                        <span id="selectedExamType">
+                            -
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 ALL COURSES ON SELECTED DATE
+            ================================================== -->
+
+            <div
+
+                class="section"
+
+                id="dateCoursesSection">
+
+
+                <h3>
+
+                    Courses Available on Selected Date
+
+                </h3>
+
+
+                <p class="hint">
+
+                    All Course / Year entries available
+                    for the selected exam date.
+
+                </p>
+
+
+                <!-- SELECT ALL -->
+
+                <div class="select-all-area">
+
+                    <input
+                        type="checkbox"
+                        id="selectAllCourses">
+
+                    <label
+                        for="selectAllCourses">
+
+                        Select All Courses
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- COURSE LIST -->
+
+                <div class="course-list">
+
+
+                    <div class="course-list-header">
+
+                        <div>
+                            Select
+                        </div>
+
+                        <div>
+                            Course
+                        </div>
+
+                        <div>
+                            Year
+                        </div>
+
+                        <div>
+                            Subject Code
+                        </div>
+
+                        <div>
+                            Subject
+                        </div>
+
+                    </div>
+
+
+                    <div id="courseListBody">
+
+                        <div class="no-course">
+
+                            Select an Exam Date.
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 SEATING MODE
+            ================================================== -->
+
+            <div class="section">
+
+
+                <h3>
+
+                    Seating Mode
+
+                </h3>
+
+
+                <p class="hint">
+
+                    Select how many students can occupy
+                    one physical seat.
+
+                </p>
+
+
+                <div class="radio-grid">
+
+
+                    <label class="radio-card">
+
+
+                        <input
+
+                            type="radio"
+
+                            name="seat_mode"
+
+                            value="1"
+
+                            required>
+
+
+                        <span class="radio-title">
+
+                            1 Student Per Seat
+
+                        </span>
+
+
+                        <span class="radio-description">
+
+                            One student per physical seat.
+
+                        </span>
+
+
+                    </label>
+
+
+
+                    <label class="radio-card">
+
+
+                        <input
+
+                            type="radio"
+
+                            name="seat_mode"
+
+                            value="2">
+
+
+                        <span class="radio-title">
+
+                            2 Students Per Seat
+
+                        </span>
+
+
+                        <span class="radio-description">
+
+                            Two students can occupy one
+                            physical seat.
+
+                        </span>
+
+
+                    </label>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 HALLS
+            ================================================== -->
+
+            <div class="section">
+
+
+                <h3>
+
+                    Select Examination Halls
+
+                </h3>
+
+
+                <p class="hint">
+
+                    Select the halls to be used.
+
+                </p>
+
+
+                {% if halls %}
+
+                    {% set floor_ns = namespace(current=None) %}
+
+                    {% for hall in halls %}
+
+                        {% set this_floor = (hall.floor or 'Other')|trim %}
+
+                        {% if this_floor != floor_ns.current %}
+
+                            {% if floor_ns.current is not none %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% set floor_ns.current = this_floor %}
+
+                            <div class="floor-section">
+
+                                <div class="floor-title">
+                                        <label class="floor-check-label">
+                                            <input type="checkbox"
+                                                   class="floor-checkbox"
+                                                   checked
+                                                   onchange="toggleFloorHalls(this)">
+                                            <span class="floor-checkmark"></span>
+                                        </label>
+                                        
+                                    {% if this_floor|upper == 'FF' %}
+                                        First Floor (FF)
+                                    {% elif this_floor|upper == 'SF' %}
+                                        Second Floor (SF)
+                                    {% else %}
+                                        {{ this_floor }}
+                                    {% endif %}
+                                
+                                    </div>
+
+                                <div class="hall-grid">
+                        {% endif %}
+
+                        <label class="hall-card">
+
+                            <input
+                                type="checkbox"
+                                class="hall-checkbox"
+                                name="hall_ids"
+                                value="{{ hall.id }}"
+                                checked>
+
+                            <div class="hall-info">
+                                <strong>{{ hall.hall_name }}</strong>
+
+                                <span>
+                                    Capacity: {{ hall.seating_capacity }}
+                                </span>
+                            </div>
+
+                        </label>
+
+                    {% endfor %}
+
+                    {% if floor_ns.current is not none %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                {% else %}
+
+                    <div class="empty-message">
+                        No halls available.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ==================================================
+                 FACULTY
+            ================================================== -->
+
+            <div class="section">
+
+
+                <h3>
+
+                    Select Faculty
+
+                </h3>
+
+
+                <p class="hint">
+
+                    Select faculty members for
+                    hall supervision.
+
+                </p>
+
+
+                <div class="faculty-grid">
+
+
+                    {% if faculties %}
+
+
+                        {% for faculty in faculties %}
+
+
+                            <label class="faculty-card">
+
+
+                                <input
+
+                                    type="checkbox"
+
+                                    name="morning_faculty_ids"
+
+                                    value="{{ faculty.id }}">
+
+
+                                <span>
+
+                                    {{ faculty.faculty_name }}
+
+
+                                    {% if faculty.department %}
+
+                                        -
+                                        {{ faculty.department }}
+
+                                    {% endif %}
+
+
+                                </span>
+
+
+                            </label>
+
+
+                        {% endfor %}
+
+
+                    {% else %}
+
+
+                        <div class="empty-message">
+
+                            No faculty details available.
+
+                        </div>
+
+
+                    {% endif %}
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 GENERATE
+            ================================================== -->
+
+            <div class="button-area">
+
+
+                <button
+
+                    type="submit"
+
+                    class="generate-btn"
+
+                    id="generateBtn">
+
+
+                    Generate Hall Allotment
+
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+
+    <!-- ==================================================
+         GENERATED ALLOTMENT
+    ================================================== -->
+
+    {% if allotment_groups %}
+
+
+        <div class="card">
+
+
+            <div class="card-title">
+
+                Generated Hall Allotment
+
+            </div>
+
+
+
+            {% for group in allotment_groups %}
+
+
+                <div class="allotment-card">
+
+
+                    <div class="allotment-header">
+
+
+                        <strong>
+
+                            {{ group.hall_name }}
+
+                        </strong>
+
+
+                        <span>
+
+                            Faculty:
+
+                            {{ group.faculty_name or '-' }}
+
+                        </span>
+
+
+                    </div>
+
+
+
+                    <div class="table-wrapper">
+
+
+                        <table>
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        S.No
+                                    </th>
+
+                                    <th>
+                                        Course
+                                    </th>
+
+                                    <th>
+                                        Year
+                                    </th>
+
+                                    <th>
+                                        Subject Code
+                                    </th>
+
+                                    <th>
+                                        Subject
+                                    </th>
+
+                                    <th>
+                                        Register Number
+                                    </th>
+
+                                    <th>
+                                        Seat Number
+                                    </th>
+
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+
+                                {% for item in group.students %}
+
+
+                                    <tr>
+
+
+                                        <td>
+
+                                            {{ loop.index }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ item.course }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ item.year }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ item.subject_code or '-' }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ item.subject or '-' }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ item.register_number }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            {{ item.seat_number or '-' }}
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <form
+                                                action="{{ url_for(
+                                                    'change_student_hall',
+                                                    exam_id=group.exam_id,
+                                                    student_id=item.student_id
+                                                ) }}"
+                                                method="POST"
+                                                style="display:inline; margin:0;">
+
+                                                <button
+                                                    type="submit"
+                                                    class="change-btn"
+                                                    onclick="return confirm('Change this student to another hall automatically?');">
+                                                    Change
+                                                </button>
+
+                                            </form>
+
+                                            {% if loop.first %}
+
+                                                <a
+                                                    href="{{ url_for(
+                                                        'delete_hall_allotment',
+                                                        exam_id=group.exam_id,
+                                                        hall_id=group.hall_id
+                                                    ) }}"
+                                                    class="delete-btn"
+                                                    onclick="return confirm('Delete this hall allotment?');">
+                                                    Delete Hall
+                                                </a>
+
+                                            {% endif %}
+
+                                        </td>
+
+
+                                    </tr>
+
+
+                                {% endfor %}
+
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+
+            <!-- ==================================================
+                 PDF / DELETE
+            ================================================== -->
+
+            <div class="actions">
+
+
+                <a
+
+                    href="{{ url_for(
+                        'admin_hall_allotment_pdf'
+                    ) }}"
+
+                    class="btn pdf-btn">
+
+
+                    Hall Allotment PDF
+
+                </a>
+
+
+
+                <a
+
+                    href="{{ url_for(
+                        'admin_seating_arrangement_pdf'
+                    ) }}"
+
+                    class="btn pdf-btn">
+
+
+                    Seating Arrangement PDF
+
+                </a>
+
+
+
+                <a
+
+                    href="{{ url_for(
+                        'hall_faculty_signature_pdf'
+                    ) }}"
+
+                    class="btn pdf-btn">
+
+
+                    Hall Faculty Signature PDF
+
+                </a>
+
+                <a
+                    href="{{ url_for('hall_student_signature_pdf') }}"
+                    class="btn pdf-btn"
+                    target="_blank">
+
+                    Student Signature PDF
+
+                </a>
+
+
+
+                <a
+
+                    href="{{ url_for(
+                        'delete_total_hall_allotment'
+                    ) }}"
+
+                    class="btn delete-all-btn"
+
+                    onclick="
+
+                        return confirm(
+
+                            'Are you sure you want to delete the entire hall allotment?'
+
+                        );
+
+                    ">
+
+
+                    Delete All Hall Allotment
+
+                </a>
+
+
+            </div>
+
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+
+<!-- ==================================================
+     JAVASCRIPT
+================================================== -->
+
+<script>
+
+
+/* ==================================================
+   TIMETABLE DATA
+================================================== */
+
+const timetableData =
+    {{ timetable_rows | tojson | safe }};
+
+
+
+/* ==================================================
+   ELEMENTS
+================================================== */
+
+const examType =
+    document.getElementById(
+        "examType"
+    );
+
+
+const examName =
+    document.getElementById(
+        "examName"
+    );
+
+
+const examDate =
+    document.getElementById(
+        "examDate"
+    );
+
+
+const examDetails =
+    document.getElementById(
+        "examDetails"
+    );
+
+
+const selectedDate =
+    document.getElementById(
+        "selectedDate"
+    );
+
+
+const selectedCourseCount =
+    document.getElementById(
+        "selectedCourseCount"
+    );
+
+
+const selectedExamName =
+    document.getElementById(
+        "selectedExamName"
+    );
+
+
+const selectedExamType =
+    document.getElementById(
+        "selectedExamType"
+    );
+
+
+const dateCoursesSection =
+    document.getElementById(
+        "dateCoursesSection"
+    );
+
+
+const courseListBody =
+    document.getElementById(
+        "courseListBody"
+    );
+
+
+const selectAllCourses =
+    document.getElementById(
+        "selectAllCourses"
+    );
+
+
+const form =
+    document.getElementById(
+        "hallAllotmentForm"
+    );
+
+
+const generateBtn =
+    document.getElementById(
+        "generateBtn"
+    );
+
+
+
+/* ==================================================
+   EXAM TYPE
+================================================== */
+
+examType.addEventListener(
+    "change",
+    function () {
+
+
+        examName.innerHTML =
+            '<option value="">Select Exam Name</option>';
+
+
+        examDate.innerHTML =
+            '<option value="">Select Exam Date</option>';
+
+
+        resetCourseArea();
+
+
+        const type =
+            this.value
+                .trim()
+                .toLowerCase();
+
+
+        const names =
+            new Set();
+
+
+        timetableData.forEach(
+            function (item) {
+
+
+                const itemType =
+                    String(
+                        item.exam_type || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if (
+                    itemType === type
+                ) {
+
+
+                    const name =
+                        String(
+                            item.exam_name || ""
+                        ).trim();
+
+
+                    if (name) {
+
+                        names.add(name);
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        names.forEach(
+            function (name) {
+
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    name;
+
+
+                option.textContent =
+                    name;
+
+
+                examName.appendChild(
+                    option
+                );
+
+
+            }
+        );
+
+
+    }
+);
+
+
+
+/* ==================================================
+   EXAM NAME
+================================================== */
+
+examName.addEventListener(
+    "change",
+    function () {
+
+
+        examDate.innerHTML =
+            '<option value="">Select Exam Date</option>';
+
+
+        resetCourseArea();
+
+
+        const type =
+            examType.value
+                .trim()
+                .toLowerCase();
+
+
+        const name =
+            this.value
+                .trim()
+                .toLowerCase();
+
+
+        /*
+         * DATE MAP
+         *
+         * Same date appears in many timetable
+         * rows, but only one date is displayed.
+         */
+
+        const dateMap =
+            new Map();
+
+
+        timetableData.forEach(
+            function (item) {
+
+
+                const itemType =
+                    String(
+                        item.exam_type || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                const itemName =
+                    String(
+                        item.exam_name || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if (
+
+                    itemType === type
+
+                    &&
+
+                    itemName === name
+
+                ) {
+
+
+                    const rawDate =
+                        String(
+                            item.exam_date || ""
+                        ).trim();
+
+
+                    if (
+
+                        rawDate
+
+                        &&
+
+                        !dateMap.has(
+                            rawDate
+                        )
+
+                    ) {
+
+
+                        dateMap.set(
+                            rawDate,
+                            item
+                        );
+
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        /*
+         * ADD UNIQUE DATES
+         */
+
+        dateMap.forEach(
+            function (item, dateKey) {
+
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                /*
+                 * First row ID is used
+                 * as the value.
+                 */
+
+                option.value =
+                    item.id;
+
+
+                /*
+                 * Keep date in option.
+                 */
+
+                option.dataset.date =
+                    dateKey;
+
+
+                option.textContent =
+                    formatDate(
+                        item.exam_date
+                    );
+
+
+                examDate.appendChild(
+                    option
+                );
+
+
+            }
+        );
+
+
+    }
+);
+
+
+
+/* ==================================================
+   EXAM DATE
+================================================== */
+
+examDate.addEventListener(
+    "change",
+    function () {
+
+
+        const selectedOption =
+            this.options[
+                this.selectedIndex
+            ];
+
+
+        if (!selectedOption) {
+
+            resetCourseArea();
+
+            return;
+
+        }
+
+
+        const selectedDateKey =
+            selectedOption.dataset.date;
+
+
+        /*
+         * Get ALL timetable rows
+         * for this date.
+         */
+
+        const coursesForDate =
+            timetableData.filter(
+                function (item) {
+
+
+                    return String(
+                        item.exam_date || ""
+                    ).trim()
+                    ===
+                    selectedDateKey;
+
+
+                }
+            );
+
+
+        /*
+         * Remove duplicate course/year
+         * entries if any.
+         */
+
+        const uniqueCourses =
+            new Map();
+
+
+        coursesForDate.forEach(
+            function (item) {
+
+
+                const department =
+                    String(
+                        item.department || ""
+                    ).trim();
+
+
+                const course =
+                    String(
+                        item.course || ""
+                    ).trim();
+
+
+                const year =
+                    String(
+                        item.year || ""
+                    ).trim();
+
+
+                const subjectCode =
+                    String(
+                        item.subject_code || ""
+                    ).trim();
+
+
+                const subject =
+                    String(
+                        item.subject_name
+                        ||
+                        item.subject
+                        ||
+                        ""
+                    ).trim();
+
+
+                const key =
+
+                    department
+                    +
+                    "|"
+                    +
+                    course
+                    +
+                    "|"
+                    +
+                    year
+                    +
+                    "|"
+                    +
+                    subjectCode;
+
+
+                if (
+                    !uniqueCourses.has(key)
+                ) {
+
+
+                    uniqueCourses.set(
+                        key,
+                        {
+                            ...item,
+                            department:
+                                department,
+
+                            course:
+                                course,
+
+                            year:
+                                year,
+
+                            subject_code:
+                                subjectCode,
+
+                            subject_name:
+                                subject
+                        }
+                    );
+
+
+                }
+
+            }
+        );
+
+
+        const courseList =
+            Array.from(
+                uniqueCourses.values()
+            );
+
+
+        /*
+         * Sort Course / Year
+         */
+
+        courseList.sort(
+            function (a, b) {
+
+                const courseA =
+                    String(
+                        a.course || ""
+                    );
+
+                const courseB =
+                    String(
+                        b.course || ""
+                    );
+
+                return courseA.localeCompare(
+                    courseB
+                );
+
+            }
+        );
+
+
+        /*
+         * Show date details
+         */
+
+        selectedDate.textContent =
+            formatDate(
+                selectedOption.dataset.date
+            );
+
+
+        selectedExamName.textContent =
+            examName.value || "-";
+
+
+        selectedExamType.textContent =
+            examType.value || "-";
+
+
+        selectedCourseCount.textContent =
+            courseList.length;
+
+
+        examDetails.style.display =
+            "block";
+
+
+        /*
+         * Show course section
+         */
+
+        dateCoursesSection.style.display =
+            "block";
+
+
+        /*
+         * Build course list
+         */
+
+        courseListBody.innerHTML = "";
+
+
+        if (
+            courseList.length === 0
+        ) {
+
+
+            courseListBody.innerHTML = `
+
+                <div class="no-course">
+
+                    No courses found for this exam date.
+
+                </div>
+
+            `;
+
+
+            selectAllCourses.checked =
+                false;
+
+
+            return;
+
+        }
+
+
+        courseList.forEach(
+            function (item) {
+
+
+                const row =
+                    document.createElement(
+                        "label"
+                    );
+
+
+                row.className =
+                    "course-row";
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * This is the value sent
+                 * to Python.
+                 */
+
+                const value =
+
+                    String(
+                        item.department || ""
+                    )
+                    +
+                    "|"
+                    +
+                    String(
+                        item.course || ""
+                    )
+                    +
+                    "|"
+                    +
+                    String(
+                        item.year || ""
+                    );
+
+
+                row.innerHTML = `
+
+                    <div>
+
+                        <input
+                            type="checkbox"
+                            name="morning_course_years"
+                            value="${escapeHtml(value)}"
+                            class="course-checkbox">
+
+                    </div>
+
+
+                    <div class="course-name">
+
+                        ${escapeHtml(
+                            item.course || "-"
+                        )}
+
+                    </div>
+
+
+                    <div class="course-year">
+
+                        ${escapeHtml(
+                            item.year || "-"
+                        )}
+
+                    </div>
+
+
+                    <div class="subject-code">
+
+                        ${escapeHtml(
+                            item.subject_code || "-"
+                        )}
+
+                    </div>
+
+
+                    <div class="subject-name">
+
+                        ${escapeHtml(
+                            item.subject_name
+                            ||
+                            item.subject
+                            ||
+                            "-"
+                        )}
+
+                    </div>
+
+                `;
+
+
+                courseListBody.appendChild(
+                    row
+                );
+
+
+            }
+        );
+
+
+        selectAllCourses.checked =
+            true;
+
+
+        /*
+         * Automatically select all courses
+         * available for the selected date.
+         */
+
+        document
+            .querySelectorAll(
+                ".course-checkbox"
+            )
+            .forEach(
+                function (checkbox) {
+
+                    checkbox.checked =
+                        true;
+
+                }
+            );
+
+
+    }
+);
+
+
+
+/* ==================================================
+   SELECT ALL COURSES
+================================================== */
+
+selectAllCourses.addEventListener(
+    "change",
+    function () {
+
+
+        const checkboxes =
+            document.querySelectorAll(
+                ".course-checkbox"
+            );
+
+
+        checkboxes.forEach(
+            function (checkbox) {
+
+                checkbox.checked =
+                    selectAllCourses.checked;
+
+            }
+        );
+
+
+    }
+);
+
+
+
+/* ==================================================
+   COURSE CHECKBOX CHANGE
+================================================== */
+
+document.addEventListener(
+    "change",
+    function (event) {
+
+
+        if (
+            event.target.classList.contains(
+                "course-checkbox"
+            )
+        ) {
+
+
+            const checkboxes =
+                document.querySelectorAll(
+                    ".course-checkbox"
+                );
+
+
+            const checked =
+                document.querySelectorAll(
+                    ".course-checkbox:checked"
+                );
+
+
+            selectAllCourses.checked =
+                checkboxes.length > 0
+                &&
+                checked.length
+                ===
+                checkboxes.length;
+
+
+        }
+
+    }
+);
+
+
+
+/* ==================================================
+   FORM VALIDATION
+================================================== */
+
+form.addEventListener(
+    "submit",
+    function (event) {
+
+
+        const selectedCourses =
+            document.querySelectorAll(
+                ".course-checkbox:checked"
+            );
+
+
+        const selectedHalls =
+            document.querySelectorAll(
+                'input[name="hall_ids"]:checked'
+            );
+
+
+        const selectedFaculty =
+            document.querySelectorAll(
+                'input[name="morning_faculty_ids"]:checked'
+            );
+
+
+        const seatMode =
+            document.querySelector(
+                'input[name="seat_mode"]:checked'
+            );
+
+
+        /* ==========================================
+           SESSION
+        ========================================== */
+
+        const session = document.getElementById("session");
+
+        if (!session || !session.value) {
+
+            event.preventDefault();
+
+            alert("Please select Session: Forenoon or Afternoon.");
+
+            return;
+
+        }
+
+
+        /* ==========================================
+           EXAM DATE
+        ========================================== */
+
+        if (!examDate.value) {
+
+
+            event.preventDefault();
+
+
+            alert(
+                "Please select Exam Date."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ==========================================
+           COURSES
+        ========================================== */
+
+        if (
+            selectedCourses.length === 0
+        ) {
+
+
+            event.preventDefault();
+
+
+            alert(
+                "Please select at least one Course / Year."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ==========================================
+           HALLS
+        ========================================== */
+
+        if (
+            selectedHalls.length === 0
+        ) {
+
+
+            event.preventDefault();
+
+
+            alert(
+                "Please select at least one Hall."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ==========================================
+           SEAT MODE
+        ========================================== */
+
+        if (!seatMode) {
+
+
+            event.preventDefault();
+
+
+            alert(
+                "Please select Seating Mode."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ==========================================
+           FACULTY
+        ========================================== */
+
+        if (
+            selectedFaculty.length === 0
+        ) {
+
+
+            event.preventDefault();
+
+
+            alert(
+                "Please select at least one Faculty."
+            );
+
+
+            return;
+
+        }
+
+
+        /* ==========================================
+           GENERATING
+        ========================================== */
+
+        generateBtn.disabled =
+            true;
+
+
+        generateBtn.textContent =
+            "Generating...";
+
+
+    }
+);
+
+
+
+/* ==================================================
+   RESET COURSE AREA
+================================================== */
+
+function resetCourseArea() {
+
+
+    dateCoursesSection.style.display =
+        "none";
+
+
+    examDetails.style.display =
+        "none";
+
+
+    courseListBody.innerHTML = `
+
+        <div class="no-course">
+
+            Select an Exam Date.
+
+        </div>
+
+    `;
+
+
+    selectAllCourses.checked =
+        false;
+
+
+    selectedDate.textContent =
+        "-";
+
+
+    selectedCourseCount.textContent =
+        "0";
+
+
+    selectedExamName.textContent =
+        "-";
+
+
+    selectedExamType.textContent =
+        "-";
+
+}
+
+
+
+/* ==================================================
+   DATE FORMAT
+================================================== */
+
+function formatDate(value) {
+
+
+    if (!value) {
+
+        return "-";
+
+    }
+
+
+    const text =
+        String(value);
+
+
+    /*
+     * YYYY-MM-DD
+     */
+
+    const parts =
+        text.split("-");
+
+
+    if (
+
+        parts.length === 3
+
+        &&
+
+        parts[0].length === 4
+
+    ) {
+
+
+        return (
+
+            parts[2]
+            +
+            "/"
+            +
+            parts[1]
+            +
+            "/"
+            +
+            parts[0]
+
+        );
+
+    }
+
+
+    return text;
+
+}
+
+
+
+/* ==================================================
+   HTML ESCAPE
+================================================== */
+
+function escapeHtml(value) {
+
+
+    return String(value || "")
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+</script>
+
+
+
+<script>
+/* =========================================================
+   FINAL HALL ALLOTMENT - TIMETABLE BASED
+   Exam Type -> Exam Name -> Date -> Course/Year
+========================================================= */
+
+const timetableData = {{ timetable_rows | tojson | safe }};
+
+const examType = document.getElementById("examType");
+const examName = document.getElementById("examName");
+const examDate = document.getElementById("examDate");
+
+const examDetails = document.getElementById("examDetails");
+const selectedDate = document.getElementById("selectedDate");
+const selectedCourseCount = document.getElementById("selectedCourseCount");
+const selectedExamName = document.getElementById("selectedExamName");
+const selectedExamType = document.getElementById("selectedExamType");
+
+const dateCoursesSection = document.getElementById("dateCoursesSection");
+const courseListBody = document.getElementById("courseListBody");
+const selectAllCourses = document.getElementById("selectAllCourses");
+
+const form = document.getElementById("hallAllotmentForm");
+const generateBtn = document.getElementById("generateBtn");
+
+
+/* =========================================================
+   EXAM TYPE -> EXAM NAME
+   Uses timetable data; does not invent names.
+========================================================= */
+
+function updateExamNames() {
+
+    const selectedType = String(
+        examType ? examType.value : ""
+    ).trim().toLowerCase();
+
+    if (!examName) return;
+
+    examName.innerHTML =
+        '<option value="">Select Exam Name</option>';
+
+    if (!selectedType) {
+        return;
+    }
+
+    const names = new Set();
+
+    timetableData.forEach(function(item) {
+
+        const rowType = String(
+            item.exam_type || ""
+        ).trim().toLowerCase();
+
+        const name = String(
+            item.exam_name || ""
+        ).trim();
+
+        if (
+            rowType === selectedType &&
+            name
+        ) {
+            names.add(name);
+        }
+    });
+
+    names.forEach(function(name) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = name;
+        option.textContent = name;
+
+        examName.appendChild(option);
+    });
+}
+
+
+/* =========================================================
+   DATE LIST
+   Filter by Exam Type + Exam Name.
+========================================================= */
+
+function updateExamDates() {
+
+    if (!examDate) return;
+
+    const selectedType = String(
+        examType ? examType.value : ""
+    ).trim().toLowerCase();
+
+    const selectedName = String(
+        examName ? examName.value : ""
+    ).trim().toLowerCase();
+
+    examDate.innerHTML =
+        '<option value="">Select Exam Date</option>';
+
+    if (!selectedType || !selectedName) {
+        resetCourseArea();
+        return;
+    }
+
+    const dates = new Set();
+
+    timetableData.forEach(function(item) {
+
+        const rowType = String(
+            item.exam_type || ""
+        ).trim().toLowerCase();
+
+        const rowName = String(
+            item.exam_name || ""
+        ).trim().toLowerCase();
+
+        const date = String(
+            item.exam_date || ""
+        ).trim();
+
+        if (
+            rowType === selectedType &&
+            rowName === selectedName &&
+            date
+        ) {
+            dates.add(date);
+        }
+    });
+
+    Array.from(dates).sort().forEach(function(date) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = date;
+        option.textContent = formatDate(date);
+
+        examDate.appendChild(option);
+    });
+
+    resetCourseArea();
+}
+
+
+/* =========================================================
+   DATE -> COURSE + YEAR
+========================================================= */
+
+function updateCoursesFromTimetable() {
+
+    resetCourseArea();
+
+    const type = String(
+        examType ? examType.value : ""
+    ).trim().toLowerCase();
+
+    const name = String(
+        examName ? examName.value : ""
+    ).trim().toLowerCase();
+
+    const date = String(
+        examDate ? examDate.value : ""
+    ).trim();
+
+    if (!type || !name || !date) {
+        return;
+    }
+
+    const unique = new Map();
+
+    timetableData.forEach(function(item) {
+
+        const rowType = String(
+            item.exam_type || ""
+        ).trim().toLowerCase();
+
+        const rowName = String(
+            item.exam_name || ""
+        ).trim().toLowerCase();
+
+        const rowDate = String(
+            item.exam_date || ""
+        ).trim();
+
+        const course = String(
+            item.course || ""
+        ).trim();
+
+        const year = String(
+            item.year || ""
+        ).trim();
+
+        if (
+            rowType !== type ||
+            rowName !== name ||
+            rowDate !== date ||
+            !course ||
+            !year
+        ) {
+            return;
+        }
+
+        const key =
+            course.toLowerCase()
+            + "|"
+            + year.toLowerCase();
+
+        if (!unique.has(key)) {
+            unique.set(key, {
+                department: String(
+                    item.department || ""
+                ).trim(),
+
+                course: course,
+                year: year,
+
+                subject_code: String(
+                    item.subject_code || ""
+                ).trim(),
+
+                subject_name: String(
+                    item.subject_name ||
+                    item.subject ||
+                    ""
+                ).trim()
+            });
+        }
+    });
+
+    const rows =
+        Array.from(unique.values());
+
+    selectedDate.textContent =
+        formatDate(date);
+
+    selectedExamType.textContent =
+        examType.value || "-";
+
+    selectedExamName.textContent =
+        examName.value || "-";
+
+    selectedCourseCount.textContent =
+        rows.length;
+
+    examDetails.style.display = "block";
+    dateCoursesSection.style.display = "block";
+
+    courseListBody.innerHTML = "";
+
+    if (rows.length === 0) {
+
+        courseListBody.innerHTML =
+            '<div class="no-course">' +
+            'No Course / Year found in Timetable for this date.' +
+            '</div>';
+
+        selectAllCourses.checked = false;
+        return;
+    }
+
+    rows.forEach(function(item) {
+
+        const label =
+            document.createElement("label");
+
+        label.className = "course-row";
+
+        /*
+         * Python route expects:
+         * department|course|year
+         */
+
+        const value =
+            item.department
+            + "|"
+            + item.course
+            + "|"
+            + item.year;
+
+        label.innerHTML = `
+            <div>
+                <input
+                    type="checkbox"
+                    name="morning_course_years"
+                    value="${escapeHtml(value)}"
+                    class="course-checkbox"
+                    checked>
+            </div>
+
+            <div class="course-name">
+                ${escapeHtml(item.course)}
+            </div>
+
+            <div class="course-year">
+                ${escapeHtml(item.year)}
+            </div>
+
+            <div class="subject-code">
+                ${escapeHtml(item.subject_code || "-")}
+            </div>
+
+            <div class="subject-name">
+                ${escapeHtml(item.subject_name || "-")}
+            </div>
+        `;
+
+        courseListBody.appendChild(label);
+    });
+
+    selectAllCourses.checked = true;
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetCourseArea() {
+
+    if (examDetails) {
+        examDetails.style.display = "none";
+    }
+
+    if (dateCoursesSection) {
+        dateCoursesSection.style.display = "none";
+    }
+
+    if (courseListBody) {
+        courseListBody.innerHTML =
+            '<div class="no-course">' +
+            'Select Exam Type, Exam Name and Exam Date.' +
+            '</div>';
+    }
+
+    if (selectAllCourses) {
+        selectAllCourses.checked = false;
+    }
+
+    if (selectedDate) {
+        selectedDate.textContent = "-";
+    }
+
+    if (selectedExamName) {
+        selectedExamName.textContent = "-";
+    }
+
+    if (selectedExamType) {
+        selectedExamType.textContent = "-";
+    }
+
+    if (selectedCourseCount) {
+        selectedCourseCount.textContent = "0";
+    }
+}
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+if (examType) {
+    examType.addEventListener(
+        "change",
+        function() {
+
+            updateExamNames();
+            updateExamDates();
+        }
+    );
+}
+
+if (examName) {
+    examName.addEventListener(
+        "change",
+        updateExamDates
+    );
+}
+
+if (examDate) {
+    examDate.addEventListener(
+        "change",
+        updateCoursesFromTimetable
+    );
+}
+
+
+/* =========================================================
+   SELECT ALL
+========================================================= */
+
+if (selectAllCourses) {
+
+    selectAllCourses.addEventListener(
+        "change",
+        function() {
+
+            document
+                .querySelectorAll(
+                    ".course-checkbox"
+                )
+                .forEach(function(cb) {
+
+                    cb.checked =
+                        selectAllCourses.checked;
+                });
+        }
+    );
+}
+
+
+/* =========================================================
+   INDIVIDUAL CHECKBOX
+========================================================= */
+
+document.addEventListener(
+    "change",
+    function(event) {
+
+        if (
+            !event.target.classList.contains(
+                "course-checkbox"
+            )
+        ) {
+            return;
+        }
+
+        const all =
+            document.querySelectorAll(
+                ".course-checkbox"
+            );
+
+        const checked =
+            document.querySelectorAll(
+                ".course-checkbox:checked"
+            );
+
+        if (selectAllCourses) {
+            selectAllCourses.checked =
+                all.length > 0 &&
+                all.length === checked.length;
+        }
+    }
+);
+
+
+/* =========================================================
+   FORM VALIDATION
+========================================================= */
+
+if (form) {
+
+    form.addEventListener(
+        "submit",
+        function(event) {
+
+            if (
+                examType &&
+                !examType.value
+            ) {
+                event.preventDefault();
+                alert("Please select Exam Type.");
+                return;
+            }
+
+            if (
+                examName &&
+                !examName.value
+            ) {
+                event.preventDefault();
+                alert("Please select Exam Name.");
+                return;
+            }
+
+            if (
+                examDate &&
+                !examDate.value
+            ) {
+                event.preventDefault();
+                alert("Please select Exam Date.");
+                return;
+            }
+
+            const selectedCourses =
+                document.querySelectorAll(
+                    ".course-checkbox:checked"
+                );
+
+            if (
+                selectedCourses.length === 0
+            ) {
+                event.preventDefault();
+                alert(
+                    "Please select at least one Course / Year."
+                );
+                return;
+            }
+
+            const halls =
+                document.querySelectorAll(
+                    'input[name="hall_ids"]:checked'
+                );
+
+            if (halls.length === 0) {
+                event.preventDefault();
+                alert("Please select at least one Hall.");
+                return;
+            }
+
+            const faculty =
+                document.querySelectorAll(
+                    'input[name="morning_faculty_ids"]:checked'
+                );
+
+            if (faculty.length === 0) {
+                event.preventDefault();
+                alert("Please select at least one Faculty.");
+                return;
+            }
+
+            const seatMode =
+                document.querySelector(
+                    'input[name="seat_mode"]:checked'
+                );
+
+            if (!seatMode) {
+                event.preventDefault();
+                alert("Please select Student Per Seat.");
+                return;
+            }
+
+            if (generateBtn) {
+                generateBtn.disabled = true;
+                generateBtn.textContent = "Generating...";
+            }
+        }
+    );
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function formatDate(value) {
+
+    const text =
+        String(value || "");
+
+    const parts =
+        text.split("-");
+
+    if (
+        parts.length === 3 &&
+        parts[0].length === 4
+    ) {
+        return (
+            parts[2] +
+            "/" +
+            parts[1] +
+            "/" +
+            parts[0]
+        );
+    }
+
+    return text || "-";
+}
+
+
+function escapeHtml(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+resetCourseArea();
+
+</script>
+
+
+<script>
+function toggleFloorHalls(floorCheckbox) {
+    const floorSection = floorCheckbox.closest('.floor-section');
+    if (!floorSection) return;
+
+    const hallCheckboxes = floorSection.querySelectorAll('.hall-checkbox');
+
+    hallCheckboxes.forEach(function (hallCheckbox) {
+        hallCheckbox.checked = floorCheckbox.checked;
+    });
+}
+
+function updateFloorCheckbox(hallCheckbox) {
+    const floorSection = hallCheckbox.closest('.floor-section');
+    if (!floorSection) return;
+
+    const floorCheckbox = floorSection.querySelector('.floor-checkbox');
+    const hallCheckboxes = floorSection.querySelectorAll('.hall-checkbox');
+
+    if (!floorCheckbox || hallCheckboxes.length === 0) return;
+
+    const checkedCount = floorSection.querySelectorAll(
+        '.hall-checkbox:checked'
+    ).length;
+
+    floorCheckbox.checked = checkedCount === hallCheckboxes.length;
+    floorCheckbox.indeterminate =
+        checkedCount > 0 && checkedCount < hallCheckboxes.length;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.hall-checkbox').forEach(function (hallCheckbox) {
+        hallCheckbox.addEventListener('change', function () {
+            updateFloorCheckbox(this);
+        });
+    });
+
+    document.querySelectorAll('.floor-checkbox').forEach(function (floorCheckbox) {
+        updateFloorCheckbox(
+            floorCheckbox.closest('.floor-section')
+                .querySelector('.hall-checkbox')
+        );
+    });
+});
+</script>
+
+</body>
+
+</html>

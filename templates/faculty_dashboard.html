@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Faculty Dashboard</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+        }
+
+        /* ==================================================
+           HEADER
+        ================================================== */
+
+        .header {
+            background: #d97706;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+        }
+
+        /* ==================================================
+           CHANGE PASSWORD BUTTON
+        ================================================== */
+
+        .change-password {
+            position: absolute;
+
+            right: 25px;
+            top: 25px;
+
+            background: white;
+            color: #d97706;
+
+            padding: 10px 16px;
+
+            text-decoration: none;
+
+            border-radius: 6px;
+
+            font-weight: bold;
+
+            transition: 0.2s;
+        }
+
+        .change-password:hover {
+            background: #fef3c7;
+        }
+
+        /* ==================================================
+           FACULTY WELCOME
+        ================================================== */
+
+        .faculty-welcome {
+            text-align: center;
+            width: 100%;
+            margin: 30px auto;
+        }
+
+        .faculty-welcome h2 {
+            margin: 0 0 8px 0;
+            font-size: 30px;
+            color: #333;
+        }
+
+        .faculty-welcome p {
+            margin: 0;
+            font-size: 18px;
+            color: #666;
+        }
+
+        /* ==================================================
+           MAIN CONTAINER
+        ================================================== */
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+
+        /* ==================================================
+           CARDS
+        ================================================== */
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.10);
+
+            text-align: center;
+        }
+
+        .card h3 {
+            color: #d97706;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* ==================================================
+           BUTTON
+        ================================================== */
+
+        .btn {
+            display: inline-block;
+
+            padding: 12px 25px;
+
+            background: #d97706;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 5px;
+
+            font-weight: bold;
+
+            margin: 5px;
+
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #b45309;
+        }
+
+        /* ==================================================
+           VIEW BUTTON
+        ================================================== */
+
+        .view-btn {
+            background: #2563eb;
+        }
+
+        .view-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* ==================================================
+           ATTENDANCE BUTTON
+        ================================================== */
+
+        .attendance-btn {
+            background: #16a34a;
+        }
+
+        .attendance-btn:hover {
+            background: #15803d;
+        }
+
+        /* ==================================================
+           LOGOUT
+        ================================================== */
+
+        .logout {
+            display: block;
+
+            width: 150px;
+
+            margin: 40px auto;
+
+            text-align: center;
+
+            padding: 12px;
+
+            background: #333;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 5px;
+        }
+
+        .logout:hover {
+            background: #222;
+        }
+
+        /* ==================================================
+           MOBILE RESPONSIVE
+        ================================================== */
+
+        @media (max-width: 700px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .change-password {
+                position: static;
+
+                display: inline-block;
+
+                margin-top: 15px;
+            }
+
+        }
+        .view-timetable-btn{
+    display:inline-block;
+    padding:12px 24px;
+    background:#2563eb;
+    color:white;
+    text-decoration:none;
+    border-radius:6px;
+    font-weight:bold;
+    margin-left:10px;
+}
+
+.view-timetable-btn:hover{
+    background:#1d4ed8;
+}
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     HEADER
+================================================== -->
+
+<div class="header">
+
+    <h1>
+        Faculty Dashboard
+    </h1>
+
+    <p>
+        College Examination Cell
+    </p>
+
+
+    <!-- ==================================================
+         CHANGE PASSWORD
+    ================================================== -->
+
+    <a
+        href="{{ url_for('faculty_change_password') }}"
+        class="change-password"
+    >
+        🔐 Change Password
+    </a>
+
+</div>
+
+
+<!-- ==================================================
+     FACULTY WELCOME
+================================================== -->
+
+<div class="faculty-welcome">
+
+    <h2>
+        Welcome, {{ faculty_name }}
+    </h2>
+
+    <p>
+        Faculty ID: {{ faculty_code }}
+    </p>
+
+</div>
+
+
+<!-- ==================================================
+     MAIN CONTAINER
+================================================== -->
+
+<div class="container">
+
+
+    <!-- ==================================================
+         CARDS
+    ================================================== -->
+
+    <div class="cards">
+
+
+        <!-- ==================================================
+             FACULTY TIMETABLE UPLOAD
+        ================================================== -->
+
+        <div class="card">
+
+            <h3>
+                Faculty Timetable
+            </h3>
+
+            <p>
+                Upload examination timetable for a
+                particular department, course and year.
+            </p>
+
+
+            <!-- UPLOAD BUTTON -->
+
+            <a
+                href="{{ url_for('faculty_timetables') }}"
+                class="btn"
+            >
+                Upload Timetables
+            </a>
+
+
+            <a href="{{ url_for('faculty_view_timetables') }}" class="view-timetable-btn">
+    View Time Table
+</a>
+        </div>
+
+
+        <!-- ==================================================
+             QUESTION PAPER UPLOAD
+        ================================================== -->
+
+        <div class="card">
+
+            <h3>
+                Question Paper
+            </h3>
+
+            <p>
+                Upload examination question papers.
+            </p>
+
+
+            <a
+                href="{{ url_for('question_paper_upload') }}"
+                class="btn"
+            >
+                Upload Question Paper
+            </a>
+
+        </div>
+
+
+        <!-- ==================================================
+             QUESTION PAPER LIST
+        ================================================== -->
+
+        <div class="card">
+
+            <h3>
+                Uploaded Question Papers
+            </h3>
+
+            <p>
+                View and delete uploaded question papers.
+            </p>
+
+
+            <a
+                href="{{ url_for('question_papers') }}"
+                class="btn view-btn"
+            >
+                View Question Papers
+            </a>
+
+        </div>
+
+
+        <!-- ==================================================
+             EXAM HALL ATTENDANCE
+        ================================================== -->
+
+        <div class="card">
+
+            <h3>
+                Exam Hall Attendance
+            </h3>
+
+            <p>
+                Mark Present or Absent for students
+                allotted to your examination hall.
+            </p>
+
+
+            <a
+                href="{{ url_for('faculty_attendance') }}"
+                class="btn attendance-btn"
+            >
+                📝 Mark Attendance
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ==================================================
+         LOGOUT
+    ================================================== -->
+
+    <a
+        href="/"
+        class="logout"
+    >
+        Logout
+    </a>
+
+
+</div>
+
+
+</body>
+
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Login</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            width: 380px;
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 10px;
+
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            color: #173b7a;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+
+            border: 1px solid #ccc;
+            border-radius: 5px;
+
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #173b7a;
+        }
+
+        .login-btn {
+            width: 100%;
+
+            padding: 13px;
+            margin-top: 25px;
+
+            border: none;
+            border-radius: 5px;
+
+            background: #173b7a;
+            color: white;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #102d5f;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .back {
+            display: block;
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #173b7a;
+
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="login-container">
+
+    <h1>Admin Login</h1>
+
+    <p class="subtitle">
+        College Examination Cell
+    </p>
+
+
+    <!-- ADMIN LOGIN FORM -->
+
+    <form method="POST" action="/admin-login">
+
+        <label for="username">
+            Username
+        </label>
+
+        <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter admin username"
+            required
+        >
+
+
+        <label for="password">
+            Password
+        </label>
+
+        <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter admin password"
+            required
+        >
+
+
+        <button
+            type="submit"
+            class="login-btn"
+        >
+            Login
+        </button>
+
+    </form>
+
+
+    <!-- ERROR MESSAGE -->
+
+    {% if error %}
+
+        <p class="error">
+            {{ error }}
+        </p>
+
+    {% endif %}
+
+
+    <a href="/" class="back">
+        ← Back to Home
+    </a>
+
+
+</div>
+
+
+</body>
+
+</html>

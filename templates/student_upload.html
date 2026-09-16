@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Student Management</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        /* HEADER */
+
+        header {
+            background: #173b7a;
+            color: white;
+
+            padding: 20px 7%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .back {
+            color: white;
+            text-decoration: none;
+
+            border: 1px solid white;
+
+            padding: 9px 15px;
+
+            border-radius: 5px;
+        }
+
+        .back:hover {
+            background: white;
+            color: #173b7a;
+        }
+
+        /* MAIN CONTAINER */
+
+        .container {
+            max-width: 1100px;
+
+            margin: 45px auto;
+
+            padding: 0 20px;
+        }
+
+        /* TITLE */
+
+        .title {
+            text-align: center;
+
+            color: #173b7a;
+
+            margin-bottom: 30px;
+
+            font-size: 27px;
+        }
+
+        /* UPLOAD BOX */
+
+        .upload-box {
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 10px;
+
+            border: 1px solid #ddd;
+
+            text-align: center;
+
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+
+            margin-bottom: 25px;
+        }
+
+        .upload-box h2 {
+            color: #173b7a;
+
+            margin-bottom: 10px;
+        }
+
+        .upload-box > p {
+            color: #666;
+
+            margin-bottom: 25px;
+
+            line-height: 1.6;
+        }
+
+        /* FILE INPUT */
+
+        input[type="file"] {
+            width: 100%;
+
+            padding: 15px;
+
+            border: 2px dashed #aaa;
+
+            border-radius: 6px;
+
+            background: #fafafa;
+
+            cursor: pointer;
+
+            font-size: 14px;
+        }
+
+        input[type="file"]:hover {
+            border-color: #173b7a;
+        }
+
+        /* UPLOAD BUTTON */
+
+        .upload-btn {
+            margin-top: 20px;
+
+            padding: 13px 30px;
+
+            border: none;
+
+            border-radius: 5px;
+
+            background: #173b7a;
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .upload-btn:hover {
+            background: #102d5f;
+        }
+
+        /* SUCCESS MESSAGE */
+
+        .success {
+            margin-top: 20px;
+
+            padding: 13px;
+
+            border-radius: 6px;
+
+            background: #e8f5e9;
+
+            color: #2e7d32;
+
+            font-weight: bold;
+        }
+
+        /* ERROR MESSAGE */
+
+        .error {
+            margin-top: 20px;
+
+            padding: 13px;
+
+            border-radius: 6px;
+
+            background: #ffebee;
+
+            color: #c62828;
+
+            font-weight: bold;
+        }
+
+        /* FORMAT BOX */
+
+        .format {
+            margin-top: 30px;
+
+            background: #eef3fa;
+
+            padding: 22px;
+
+            border-radius: 8px;
+
+            text-align: left;
+        }
+
+        .format h3 {
+            color: #173b7a;
+
+            margin-bottom: 15px;
+
+            text-align: left;
+        }
+
+        /* TABLE */
+
+        .table-container {
+            width: 100%;
+
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            background: white;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+
+            padding: 12px;
+
+            text-align: center;
+        }
+
+        th {
+            background: #173b7a;
+
+            color: white;
+
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fc;
+        }
+
+        tr:hover {
+            background: #eef3fa;
+        }
+
+        /* FOOTER */
+
+        footer {
+            margin-top: 50px;
+
+            background: #173b7a;
+
+            color: white;
+
+            text-align: center;
+
+            padding: 18px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            header {
+                flex-direction: column;
+
+                gap: 15px;
+
+                text-align: center;
+            }
+
+            .container {
+                margin-top: 30px;
+            }
+
+            .upload-box {
+                padding: 25px 18px;
+            }
+
+            .title {
+                font-size: 23px;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 9px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header>
+
+    <div>
+
+        <h1>
+            Student Management
+        </h1>
+
+        <p>
+            College Examination Cell
+        </p>
+
+    </div>
+
+
+    <a href="/admin-dashboard" class="back">
+        ← Dashboard
+    </a>
+
+</header>
+
+
+<!-- MAIN CONTAINER -->
+
+<div class="container">
+
+
+    <h2 class="title">
+        Student Data Upload
+    </h2>
+
+
+    <!-- UPLOAD SECTION -->
+
+    <div class="upload-box">
+
+
+        <h2>
+            Upload Student Excel File
+        </h2>
+
+
+        <p>
+            Upload the Excel file containing
+            student department, year, course,
+            register number and student name.
+        </p>
+
+
+        <!-- EXCEL UPLOAD FORM -->
+
+        <form
+            method="POST"
+            action="/student-upload"
+            enctype="multipart/form-data"
+        >
+
+            <input
+                type="file"
+                name="student_file"
+                accept=".xlsx"
+                required
+            >
+
+
+            <button
+                type="submit"
+                class="upload-btn"
+            >
+                Upload Student Data
+            </button>
+
+        </form>
+
+
+        <!-- SUCCESS -->
+
+        {% if success %}
+
+        <div class="success">
+
+            {{ success }}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- ERROR -->
+
+        {% if error %}
+
+        <div class="error">
+
+            {{ error }}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- REQUIRED FORMAT -->
+
+        <div class="format">
+
+            <h3>
+                Required Excel Format
+            </h3>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <tr>
+
+                        <th>
+                            S.No
+                        </th>
+
+                        <th>
+                            Department
+                        </th>
+
+                        <th>
+                            Year
+                        </th>
+
+                        <th>
+                            Course
+                        </th>
+
+                        <th>
+                            Register Number
+                        </th>
+
+                        <th>
+                            Student Name
+                        </th>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            1
+                        </td>
+
+                        <td>
+                            COMPUTER APPLICATION
+                        </td>
+
+                        <td>
+                            III
+                        </td>
+
+                        <td>
+                            CYBER SECURITY
+                        </td>
+
+                        <td>
+                            2428N0001
+                        </td>
+
+                        <td>
+                            ABINAYA R
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            2
+                        </td>
+
+                        <td>
+                            COMPUTER APPLICATION
+                        </td>
+
+                        <td>
+                            III
+                        </td>
+
+                        <td>
+                            CYBER SECURITY
+                        </td>
+
+                        <td>
+                            2428N0002
+                        </td>
+
+                        <td>
+                            ANBUSELVAM K
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- UPLOADED STUDENTS -->
+
+    {% if students %}
+
+    <div class="upload-box">
+
+        <h2>
+            Uploaded Student Data
+        </h2>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <tr>
+
+                    <th>
+                        S.No
+                    </th>
+
+                    <th>
+                        Register Number
+                    </th>
+
+                    <th>
+                        Name
+                    </th>
+
+                    <th>
+                        Department
+                    </th>
+
+                    <th>
+                        Course
+                    </th>
+
+                    <th>
+                        Year
+                    </th>
+
+                </tr>
+
+
+                {% for student in students %}
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+                    <td>
+                        {{ student["register_number"] }}
+                    </td>
+
+                    <td>
+                        {{ student["name"] }}
+                    </td>
+
+                    <td>
+                        {{ student["department"] }}
+                    </td>
+
+                    <td>
+                        {{ student["course"] }}
+                    </td>
+
+                    <td>
+                        {{ student["year"] }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+
+            </table>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+</div>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <p>
+        © 2026 College Examination Cell
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

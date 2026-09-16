@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hall Management</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+        }
+
+        header {
+            background: #173b7a;
+            color: white;
+            padding: 20px 7%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .back {
+            color: white;
+            text-decoration: none;
+
+            border: 1px solid white;
+            padding: 9px 15px;
+            border-radius: 5px;
+        }
+
+        .back:hover {
+            background: white;
+            color: #173b7a;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .title {
+            text-align: center;
+            color: #173b7a;
+            margin-bottom: 30px;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 25px;
+
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+        }
+
+        .box h2 {
+            color: #173b7a;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+
+            border: 1px solid #ccc;
+            border-radius: 5px;
+
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #173b7a;
+        }
+
+        .save-btn {
+            margin-top: 20px;
+            padding: 13px 25px;
+
+            border: none;
+            border-radius: 5px;
+
+            background: #173b7a;
+            color: white;
+
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #102d5f;
+        }
+
+        .success {
+            margin-top: 20px;
+            padding: 12px;
+
+            border-radius: 5px;
+
+            background: #e8f5e9;
+            color: #2e7d32;
+
+            font-weight: bold;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 12px;
+
+            border-radius: 5px;
+
+            background: #ffebee;
+            color: #c62828;
+
+            font-weight: bold;
+        }
+
+        .example {
+            background: #eef3fa;
+            padding: 18px;
+            border-radius: 7px;
+            margin-top: 20px;
+        }
+
+        .example h3 {
+            color: #173b7a;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: #173b7a;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fc;
+        }
+
+        .status {
+            color: green;
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: 50px;
+            background: #173b7a;
+            color: white;
+            text-align: center;
+            padding: 18px;
+        }
+
+        @media (max-width: 700px) {
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div>
+
+        <h1>
+            Hall Management
+        </h1>
+
+        <p>
+            College Examination Cell
+        </p>
+
+    </div>
+
+
+    <a href="/admin-dashboard" class="back">
+        ← Dashboard
+    </a>
+
+</header>
+
+
+<div class="container">
+
+
+    <h2 class="title">
+        Examination Hall Management
+    </h2>
+
+
+    <!-- HALL DETAILS -->
+
+    <div class="box">
+
+        <h2>
+            1. Add Examination Hall
+        </h2>
+
+
+        <form
+            method="POST"
+            action="/hall-management"
+        >
+
+
+            <label>
+                Hall Number / Name
+            </label>
+
+            <input
+                type="text"
+                name="hall_name"
+                placeholder="Example: Hall 1"
+                required
+            >
+
+
+            <label>
+                Seating Capacity
+            </label>
+
+            <input
+                type="number"
+                name="seating_capacity"
+                min="1"
+                placeholder="Example: 30"
+                required
+            >
+
+
+            <button
+                type="submit"
+                class="save-btn"
+            >
+                Add Hall
+            </button>
+
+
+        </form>
+
+
+        {% if success %}
+
+        <div class="success">
+
+            {{ success }}
+
+        </div>
+
+        {% endif %}
+
+
+        {% if error %}
+
+        <div class="error">
+
+            {{ error }}
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="example">
+
+            <h3>
+                Example
+            </h3>
+
+            <p>
+                Hall 1 → 30 seats
+            </p>
+
+            <p>
+                Hall 2 → 40 seats
+            </p>
+
+            <p>
+                Hall 3 → 50 seats
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- SAVED HALLS -->
+
+    <div class="box">
+
+
+        <h2>
+            2. Configured Halls
+        </h2>
+
+
+        {% if halls %}
+
+        <table>
+
+            <tr>
+
+                <th>
+                    Hall No
+                </th>
+
+                <th>
+                    Hall Name
+                </th>
+
+                <th>
+                    Seating Capacity
+                </th>
+
+                <th>
+                    Status
+                </th>
+
+            </tr>
+
+
+            {% for hall in halls %}
+
+            <tr>
+
+                <td>
+                    {{ loop.index }}
+                </td>
+
+                <td>
+                    {{ hall.hall_name }}
+                </td>
+
+                <td>
+                    {{ hall.seating_capacity }}
+                </td>
+
+                <td class="status">
+                    Available
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+
+        </table>
+
+        {% else %}
+
+        <p>
+            No examination halls configured yet.
+        </p>
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+
+<footer>
+
+    <p>
+        © 2026 College Examination Cell
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

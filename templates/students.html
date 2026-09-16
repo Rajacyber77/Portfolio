@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Student Data</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        header {
+            background: #173b7a;
+            color: white;
+            padding: 20px 7%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .back {
+            color: white;
+            text-decoration: none;
+            border: 1px solid white;
+            padding: 9px 15px;
+            border-radius: 5px;
+        }
+
+        .back:hover {
+            background: white;
+            color: #173b7a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .title {
+            text-align: center;
+            color: #173b7a;
+            margin-bottom: 30px;
+        }
+
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+
+        .delete-all-box {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .delete-all-btn {
+            background: #c62828;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .delete-all-btn:hover {
+            background: #8e0000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 13px;
+            text-align: center;
+        }
+
+        th {
+            background: #173b7a;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fc;
+        }
+
+        tr:hover {
+            background: #eef3fa;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        footer {
+            margin-top: 50px;
+            background: #173b7a;
+            color: white;
+            text-align: center;
+            padding: 18px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div>
+
+        <h1>Student Management</h1>
+
+        <p>College Examination Cell</p>
+
+    </div>
+
+    <a href="/admin-dashboard" class="back">
+        ← Dashboard
+    </a>
+
+</header>
+
+
+<div class="container">
+
+    <h2 class="title">
+        Student Data
+    </h2>
+
+
+    <div class="table-box">
+
+
+        {% if students %}
+
+
+        <!-- DELETE ALL -->
+
+        <div class="delete-all-box">
+
+            <form
+                method="POST"
+                action="/delete-all-students"
+                onsubmit="return confirm('Are you sure you want to delete ALL student data?');"
+            >
+
+                <button
+                    type="submit"
+                    class="delete-all-btn"
+                >
+                    Delete All Student Data
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- STUDENT TABLE -->
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>S.No</th>
+
+                    <th>Register Number</th>
+
+                    <th>Student Name</th>
+
+                    <th>Department</th>
+
+                    <th>Course</th>
+
+                    <th>Year</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for student in students %}
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+                    <td>
+                        {{ student.register_number }}
+                    </td>
+
+                    <td>
+                        {{ student.name }}
+                    </td>
+
+                    <td>
+                        {{ student.department }}
+                    </td>
+
+                    <td>
+                        {{ student.course }}
+                    </td>
+
+                    <td>
+                        {{ student.year }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+
+        {% else %}
+
+        <div class="empty">
+
+            No student data available.
+
+        </div>
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+
+<footer>
+
+    © 2026 College Examination Cell
+
+</footer>
+
+
+</body>
+
+</html>

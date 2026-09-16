@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard</title>
+
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+
+        /* ==================================================
+           HEADER
+        ================================================== */
+
+        header {
+            background: #173b7a;
+            color: white;
+
+            padding: 20px 7%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+        header h1 {
+            font-size: 24px;
+        }
+
+
+        header p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+
+        /* ==================================================
+           HEADER BUTTONS
+        ================================================== */
+
+        .header-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+
+        .change-password {
+
+            color: white;
+
+            text-decoration: none;
+
+            border: 1px solid white;
+
+            padding: 9px 16px;
+
+            border-radius: 5px;
+
+            font-weight: bold;
+
+            transition: 0.2s;
+        }
+
+
+        .change-password:hover {
+
+            background: white;
+
+            color: #173b7a;
+        }
+
+
+        .logout {
+
+            color: white;
+
+            text-decoration: none;
+
+            border: 1px solid white;
+
+            padding: 9px 16px;
+
+            border-radius: 5px;
+
+            transition: 0.2s;
+        }
+
+
+        .logout:hover {
+
+            background: white;
+
+            color: #173b7a;
+        }
+
+
+        /* ==================================================
+           DASHBOARD
+        ================================================== */
+
+        .dashboard {
+
+            padding: 50px 7%;
+        }
+
+
+        .welcome {
+
+            text-align: center;
+
+            margin-bottom: 40px;
+        }
+
+
+        .welcome h2 {
+
+            color: #173b7a;
+
+            margin-bottom: 10px;
+        }
+
+
+        .welcome p {
+
+            color: #666;
+        }
+
+
+        /* ==================================================
+           CARDS
+        ================================================== */
+
+        .cards {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 25px;
+        }
+
+
+        .card {
+
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 10px;
+
+            border: 1px solid #ddd;
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.08);
+
+            text-align: center;
+        }
+
+
+        .card .icon {
+
+            font-size: 40px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .card h3 {
+
+            color: #173b7a;
+
+            margin-bottom: 10px;
+        }
+
+
+        .card p {
+
+            color: #666;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            min-height: 45px;
+        }
+
+
+        .card a {
+
+            display: inline-block;
+
+            margin-top: 20px;
+
+            padding: 11px 22px;
+
+            background: #173b7a;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 5px;
+
+            font-size: 14px;
+        }
+
+
+        .card a:hover {
+
+            background: #102d5f;
+        }
+
+
+        /* ==================================================
+           FOOTER
+        ================================================== */
+
+        footer {
+
+            margin-top: 50px;
+
+            background: #173b7a;
+
+            color: white;
+
+            text-align: center;
+
+            padding: 18px;
+        }
+
+
+        /* ==================================================
+           RESPONSIVE
+        ================================================== */
+
+        @media (max-width: 900px) {
+
+            .cards {
+
+                grid-template-columns:
+                    1fr 1fr;
+            }
+
+
+            .status-card {
+
+                grid-column: span 2;
+            }
+
+
+            header {
+
+                flex-direction: column;
+
+                gap: 15px;
+
+                text-align: center;
+            }
+
+
+            .header-actions {
+
+                justify-content: center;
+
+                flex-wrap: wrap;
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .cards {
+
+                grid-template-columns: 1fr;
+            }
+
+
+            .status-card {
+
+                grid-column: span 1;
+            }
+
+
+            .header-actions {
+
+                flex-direction: column;
+
+                width: 100%;
+            }
+
+
+            .change-password,
+            .logout {
+
+                display: inline-block;
+
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     HEADER
+================================================== -->
+
+<header>
+
+    <div>
+
+        <h1>
+            Admin Dashboard
+        </h1>
+
+        <p>
+            College Examination Cell
+        </p>
+
+    </div>
+
+
+    <!-- ==================================================
+         CHANGE PASSWORD + LOGOUT
+    ================================================== -->
+
+    <div class="header-actions">
+
+        <a
+            href="{{ url_for('change_admin_password') }}"
+            class="change-password"
+        >
+            🔐 Change Password
+        </a>
+
+
+        <a
+            href="{{ url_for('admin_logout') }}"
+            class="logout"
+        >
+            Logout
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- ==================================================
+     DASHBOARD
+================================================== -->
+
+<section class="dashboard">
+
+
+    <!-- ==================================================
+         WELCOME
+    ================================================== -->
+
+    <div class="welcome">
+
+        <h2>
+            Welcome, Administrator
+        </h2>
+
+        <p>
+            Manage students, faculty, departments,
+            examination halls and hall allotment.
+        </p>
+
+    </div>
+
+
+    <!-- ==================================================
+         CARDS
+    ================================================== -->
+
+    <div class="cards">
+
+
+        <!-- STUDENT -->
+
+        <div class="card">
+
+            <div class="icon">
+                👨‍🎓
+            </div>
+
+            <h3>
+                Student Management
+            </h3>
+
+            <p>
+                Upload and manage student details using Excel.
+            </p>
+
+            <a href="/student-upload">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- FACULTY -->
+
+        <div class="card">
+
+            <div class="icon">
+                👨‍🏫
+            </div>
+
+            <h3>
+                Faculty Management
+            </h3>
+
+            <p>
+                Upload faculty details and manage faculty information.
+            </p>
+
+            <a href="/faculty-upload">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- HALL -->
+
+        <div class="card">
+
+            <div class="icon">
+                🏫
+            </div>
+
+            <h3>
+                Hall Management
+            </h3>
+
+            <p>
+                Enter hall name and seating capacity.
+            </p>
+
+            <a href="{{ url_for('admin_hall') }}">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- ALLOTMENT -->
+
+        <div class="card">
+
+            <div class="icon">
+                📋
+            </div>
+
+            <h3>
+                Hall Allotment
+            </h3>
+
+            <p>
+                Generate automatic hall and seating arrangement.
+            </p>
+
+            <a href="/hall-allotment">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- EXAM TIMETABLE -->
+
+        <div class="card">
+
+            <div class="icon">
+                📅
+            </div>
+
+            <h3>
+                Exam Timetable
+            </h3>
+
+            <p>
+                Upload and manage examination timetable using Excel.
+            </p>
+
+            <a href="/admin-timetable-upload">
+                Open new timetable
+            </a>
+
+        </div>
+
+
+        <!-- QUESTION PAPER MANAGEMENT -->
+
+        <div class="card">
+
+            <div class="icon">
+                📄
+            </div>
+
+            <h3>
+                Question Paper Management
+            </h3>
+
+            <p>
+                View, download and delete uploaded question papers.
+            </p>
+
+            <a href="{{ url_for('question_papers') }}">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- ATTENDANCE -->
+
+        <div class="card">
+
+            <div class="icon">
+                📝
+            </div>
+
+            <h3>
+                Exam Hall Attendance
+            </h3>
+
+            <p>
+                View hall-wise Present and Absent student attendance.
+            </p>
+
+            <a href="{{ url_for('admin_attendance') }}">
+                Open Attendance
+            </a>
+
+        </div>
+
+
+        <!-- ARREAR HALL ALLOTMENT -->
+
+        <div class="card">
+
+            <div class="icon">
+                🧾
+            </div>
+
+            <h3>
+                Arrear Hall Allotment
+            </h3>
+
+            <p>
+                Upload arrear student data, timetable and allot arrear students to halls.
+            </p>
+
+            <a href="{{ url_for('arrear_hall_allotment') }}">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div
+            class="card status-card"
+            onclick="window.location.href='{{ url_for('status') }}'"
+            style="cursor: pointer;"
+        >
+
+            <div class="icon">
+                📊
+            </div>
+
+            <h3>
+                Status
+            </h3>
+
+            <p>
+                Search Hall or Faculty status and
+                view examination allotment details.
+            </p>
+
+            <a href="{{ url_for('status') }}">
+                Open
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+<!-- ==================================================
+     FOOTER
+================================================== -->
+
+<footer>
+
+    <p>
+        © College Examination Cell
+    </p>
+
+    <p>
+        Hall Allotment Management System
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>

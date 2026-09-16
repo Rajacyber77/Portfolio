@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Faculty Timetables</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        header {
+            background: #d97706;
+            color: white;
+            padding: 22px 7%;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .back {
+            color: white;
+            text-decoration: none;
+            border: 1px solid white;
+            padding: 9px 15px;
+            border-radius: 5px;
+        }
+
+        .back:hover {
+            background: white;
+            color: #d97706;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .title {
+            text-align: center;
+            color: #d97706;
+            margin-bottom: 30px;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .box h2 {
+            color: #d97706;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+
+            border: 1px solid #ccc;
+            border-radius: 5px;
+
+            font-size: 15px;
+            background: white;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #d97706;
+        }
+
+        select:disabled {
+            background: #f1f1f1;
+            color: #777;
+            cursor: not-allowed;
+        }
+
+        .upload-btn {
+            margin-top: 10px;
+
+            padding: 13px 25px;
+
+            background: #d97706;
+            color: white;
+
+            border: none;
+            border-radius: 5px;
+
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .upload-btn:hover {
+            background: #b45309;
+        }
+
+        .success {
+            margin-bottom: 20px;
+            padding: 12px;
+
+            background: #e8f5e9;
+            color: #2e7d32;
+
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .error {
+            margin-bottom: 20px;
+            padding: 12px;
+
+            background: #ffebee;
+            color: #c62828;
+
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: #d97706;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background: #fffaf5;
+        }
+
+        .download-btn {
+            display: inline-block;
+
+            padding: 8px 13px;
+
+            background: #16a34a;
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 5px;
+            margin: 2px;
+        }
+
+        .download-btn:hover {
+            background: #15803d;
+        }
+
+        .delete-btn {
+            padding: 8px 13px;
+
+            background: #dc2626;
+            color: white;
+
+            border: none;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+        }
+
+        footer {
+            margin-top: 50px;
+
+            background: #d97706;
+            color: white;
+
+            text-align: center;
+
+            padding: 18px;
+        }
+
+        .info {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            .box {
+                padding: 20px;
+                overflow-x: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================================================== -->
+<!-- HEADER -->
+<!-- ================================================== -->
+
+<header>
+
+    <div>
+
+        <h1>
+            Faculty Timetables
+        </h1>
+
+        <p>
+            College Examination Cell
+        </p>
+
+    </div>
+
+
+    <a
+        href="{{ url_for('faculty_dashboard') }}"
+        class="back"
+    >
+        ← Back to Dashboard
+    </a>
+
+</header>
+
+
+
+<div class="container">
+
+
+    <h2 class="title">
+        Faculty Timetable Management
+    </h2>
+
+
+
+    <!-- ================================================== -->
+    <!-- UPLOAD TIMETABLE -->
+    <!-- ================================================== -->
+
+    <div class="box">
+
+        <h2>
+            Upload Examination Timetable
+        </h2>
+
+
+        <div class="info">
+
+            Department, Course and Year are taken
+            automatically from the student data uploaded
+            through Student Management.
+
+        </div>
+
+
+        {% if success %}
+
+        <div class="success">
+            {{ success }}
+        </div>
+
+        {% endif %}
+
+
+
+        {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+
+        <form
+            method="POST"
+            action="{{ url_for('faculty_timetables') }}"
+            enctype="multipart/form-data"
+        >
+
+
+            <!-- ================================================== -->
+            <!-- DEPARTMENT -->
+            <!-- ================================================== -->
+
+            <div class="input-group">
+
+                <label for="department">
+                    Department
+                </label>
+
+
+                <select
+                    name="department"
+                    id="department"
+                    required
+                >
+
+                    <option value="">
+                        Select Department
+                    </option>
+
+
+                    {% set department_list = [] %}
+
+
+                    {% for item in student_academic_data %}
+
+
+                        {% if item.department
+                              and item.department not in department_list %}
+
+
+                            {% set _ = department_list.append(item.department) %}
+
+
+                            <option
+                                value="{{ item.department }}"
+                            >
+                                {{ item.department }}
+                            </option>
+
+
+                        {% endif %}
+
+
+                    {% endfor %}
+
+
+                </select>
+
+            </div>
+
+
+
+            <!-- ================================================== -->
+            <!-- COURSE -->
+            <!-- ================================================== -->
+
+            <div class="input-group">
+
+                <label for="course">
+                    Course
+                </label>
+
+
+                <select
+                    name="course"
+                    id="course"
+                    required
+                    disabled
+                >
+
+                    <option value="">
+                        Select Department First
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- ================================================== -->
+            <!-- YEAR -->
+            <!-- ================================================== -->
+
+            <div class="input-group">
+
+                <label for="year">
+                    Year
+                </label>
+
+
+                <select
+                    name="year"
+                    id="year"
+                    required
+                    disabled
+                >
+
+                    <option value="">
+                        Select Course First
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- ================================================== -->
+            <!-- FILE -->
+            <!-- ================================================== -->
+
+            <div class="input-group">
+
+                <label for="timetable_file">
+                    Timetable File
+                </label>
+
+
+                <input
+                    type="file"
+                    name="timetable_file"
+                    id="timetable_file"
+                    accept=".xlsx,.xls,.pdf"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- ================================================== -->
+            <!-- UPLOAD BUTTON -->
+            <!-- ================================================== -->
+
+            <button
+                type="submit"
+                class="upload-btn"
+            >
+                Upload Timetable
+            </button>
+
+
+        </form>
+
+    </div>
+
+
+
+    <!-- ================================================== -->
+    <!-- UPLOADED TIMETABLES -->
+    <!-- ================================================== -->
+
+    <div class="box">
+
+        <h2>
+            Uploaded Examination Timetables
+        </h2>
+
+
+
+        {% if timetables %}
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        S.No
+                    </th>
+
+                    <th>
+                        Department
+                    </th>
+
+                    <th>
+                        Course
+                    </th>
+
+                    <th>
+                        Year
+                    </th>
+
+                    <th>
+                        File
+                    </th>
+
+                    <th>
+                        Uploaded At
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+                {% for timetable in timetables %}
+
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+
+                    <td>
+                        {{ timetable.department }}
+                    </td>
+
+
+                    <td>
+                        {{ timetable.course }}
+                    </td>
+
+
+                    <td>
+                        {{ timetable.year }}
+                    </td>
+
+
+                    <td>
+                        {{ timetable.file_name }}
+                    </td>
+
+
+                    <td>
+                        {{ timetable.uploaded_at }}
+                    </td>
+
+
+                    <td>
+
+
+                        <!-- DOWNLOAD -->
+
+                        <a
+                            href="{{ url_for(
+                                'download_faculty_timetables',
+                                filename=timetable.file_name
+                            ) }}"
+                            class="download-btn"
+                        >
+                            Download
+                        </a>
+
+
+
+                        <!-- DELETE -->
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'delete_faculty_timetables',
+                                timetable_id=timetable.id
+                            ) }}"
+                            style="display:inline;"
+                            onsubmit="return confirm(
+                                'Are you sure you want to delete this timetable?'
+                            );"
+                        >
+
+                            <button
+                                type="submit"
+                                class="delete-btn"
+                            >
+                                Delete
+                            </button>
+
+                        </form>
+
+
+                    </td>
+
+                </tr>
+
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+
+        {% else %}
+
+
+        <div class="empty">
+
+            No timetables uploaded yet.
+
+        </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- ================================================== -->
+<!-- FOOTER -->
+<!-- ================================================== -->
+
+<footer>
+
+    <p>
+        © 2026 College Examination Cell
+    </p>
+
+    <p>
+        Faculty Timetable Management
+    </p>
+
+</footer>
+
+
+
+<!-- ================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ================================================== -->
+
+<script>
+
+function normalize(value) {
+    return String(value || "").trim().toLowerCase();
+}
+
+
+// ==================================================
+// YEAR NORMALIZATION
+// ==================================================
+
+function normalizeYear(value) {
+
+    const text = String(value || "").trim();
+    const upper = text.toUpperCase();
+
+    if (["I", "1", "1 YEAR", "I YEAR", "1ST", "1ST YEAR"].includes(upper)) {
+        return "I Year";
+    }
+
+    if (["II", "2", "2 YEAR", "II YEAR", "2ND", "2ND YEAR"].includes(upper)) {
+        return "II Year";
+    }
+
+    if (["III", "3", "3 YEAR", "III YEAR", "3RD", "3RD YEAR"].includes(upper)) {
+        return "III Year";
+    }
+
+    if (["IV", "4", "4 YEAR", "IV YEAR", "4TH", "4TH YEAR"].includes(upper)) {
+        return "IV Year";
+    }
+
+    return text;
+}
+
+
+// ==================================================
+// ACADEMIC DATA FROM FLASK
+// ==================================================
+
+const academicData = [
+
+    {% for item in student_academic_data %}
+
+    {
+        department: {{ item.department | tojson }},
+        course: {{ item.course | tojson }},
+        year: {{ item.year | tojson }},
+    }
+
+    {% if not loop.last %},{% endif %}
+
+    {% endfor %}
+
+];
+
+
+// ==================================================
+// SELECT ELEMENTS
+// ==================================================
+
+const departmentSelect =
+    document.getElementById("department");
+
+const courseSelect =
+    document.getElementById("course");
+
+const yearSelect =
+    document.getElementById("year");
+
+
+// ==================================================
+// DEPARTMENT CHANGE
+// Show ONLY courses belonging to selected department
+// ==================================================
+
+departmentSelect.addEventListener(
+    "change",
+    function () {
+
+        const selectedDepartment =
+            this.value.trim();
+
+
+        // Reset Course
+        courseSelect.innerHTML =
+            '<option value="">Select Course</option>';
+
+        // Reset Year
+        yearSelect.innerHTML =
+            '<option value="">Select Course First</option>';
+
+        yearSelect.disabled = true;
+
+
+        if (!selectedDepartment) {
+
+            courseSelect.disabled = true;
+
+            return;
+        }
+
+
+        const courses = [];
+
+
+        academicData.forEach(
+            function (item) {
+
+                if (
+                    normalize(item.department) ===
+                    normalize(selectedDepartment)
+                ) {
+
+                    const course =
+                        String(item.course || "").trim();
+
+
+                    if (
+                        course &&
+                        !courses.some(
+                            function (existingCourse) {
+
+                                return normalize(existingCourse) ===
+                                       normalize(course);
+
+                            }
+                        )
+                    ) {
+
+                        courses.push(course);
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        courses.forEach(
+            function (course) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = course;
+
+                option.textContent = course;
+
+                courseSelect.appendChild(option);
+
+            }
+        );
+
+
+        courseSelect.disabled =
+            courses.length === 0;
+
+    }
+);
+
+
+// ==================================================
+// COURSE CHANGE
+// Show ONLY years belonging to
+// selected Department + selected Course
+// ==================================================
+
+courseSelect.addEventListener(
+    "change",
+    function () {
+
+        const selectedDepartment =
+            departmentSelect.value.trim();
+
+        const selectedCourse =
+            this.value.trim();
+
+
+        // Reset Year
+        yearSelect.innerHTML =
+            '<option value="">Select Year</option>';
+
+
+        if (
+            !selectedDepartment ||
+            !selectedCourse
+        ) {
+
+            yearSelect.disabled = true;
+
+            return;
+        }
+
+
+        const years = [];
+
+
+        academicData.forEach(
+            function (item) {
+
+                if (
+                    normalize(item.department) ===
+                    normalize(selectedDepartment)
+                    &&
+                    normalize(item.course) ===
+                    normalize(selectedCourse)
+                ) {
+
+                    const normalizedYear =
+                        normalizeYear(item.year);
+
+
+                    if (
+                        normalizedYear &&
+                        !years.some(
+                            function (existingYear) {
+
+                                return normalizeYear(existingYear) ===
+                                       normalizedYear;
+
+                            }
+                        )
+                    ) {
+
+                        years.push(normalizedYear);
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        // Sort years in proper order
+        const yearOrder = {
+            "I Year": 1,
+            "II Year": 2,
+            "III Year": 3,
+            "IV Year": 4
+        };
+
+        years.sort(
+            function (a, b) {
+
+                const orderA =
+                    yearOrder[a] || 99;
+
+                const orderB =
+                    yearOrder[b] || 99;
+
+                return orderA - orderB;
+
+            }
+        );
+
+
+        years.forEach(
+            function (year) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = year;
+
+                option.textContent = year;
+
+                yearSelect.appendChild(option);
+
+            }
+        );
+
+
+        yearSelect.disabled =
+            years.length === 0;
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

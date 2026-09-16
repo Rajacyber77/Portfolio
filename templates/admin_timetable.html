@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Add Exam Timetable</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 650px;
+            margin: 40px auto;
+        }
+
+        .form-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 25px;
+        }
+
+        .title {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .checkbox-section {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            background: #fafafa;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .hint {
+            margin-top: 6px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .time-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-row select {
+            flex: 1;
+        }
+
+        .save-btn {
+            width: 100%;
+            margin-top: 25px;
+            padding: 13px;
+            border: none;
+            border-radius: 5px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .success {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .error {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #fee2e2;
+            color: #b91c1c;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+
+            .time-row {
+                flex-direction: column;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<div class="header">
+
+    <h1>
+        Exam Timetable Management
+    </h1>
+
+    <p>
+        College Examination Cell
+    </p>
+
+</div>
+
+
+<div class="container">
+
+    <div class="form-box">
+
+        <h2>
+            Add Examination Timetable
+        </h2>
+
+
+        <!-- SUCCESS -->
+
+        {% if success %}
+
+        <div class="success">
+            {{ success }}
+        </div>
+
+        {% endif %}
+
+
+        <!-- ERROR -->
+
+        {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+
+
+            <!-- ================================= -->
+            <!-- DEPARTMENT -->
+            <!-- ================================= -->
+
+            <label class="title">
+                Select Department
+            </label>
+
+            <div class="checkbox-section">
+
+                {% if departments %}
+
+                    {% for item in departments %}
+
+                    <div class="checkbox-item">
+
+                        <input
+                            type="checkbox"
+                            name="department"
+                            value="{{ item.department_name }}"
+                            class="department-checkbox"
+                            data-department="{{ item.department_name }}"
+                            id="dept{{ loop.index }}"
+                        >
+
+                        <label
+                            for="dept{{ loop.index }}"
+                            style="margin:0; font-weight:normal;"
+                        >
+                            {{ item.department_name }}
+                        </label>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        No departments available.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+            <p class="hint">
+                Select one or more departments.
+            </p>
+
+
+            <!-- ================================= -->
+            <!-- COURSE -->
+            <!-- ================================= -->
+
+            <label class="title">
+                Select Course
+            </label>
+
+            <div class="checkbox-section">
+
+                {% if departments %}
+
+                    {% for item in departments %}
+
+                    <div
+                        class="checkbox-item course-item"
+                        data-course-department="{{ item.department_name }}"
+                        style="display:none;"
+                    >
+
+                        <input
+                            type="checkbox"
+                            name="course"
+                            value="{{ item.course_name }}"
+                            class="course-checkbox"
+                        >
+
+                        <span>
+                            {{ item.course_name }}
+                        </span>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        No courses available.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+            <p class="hint">
+                Courses will appear based on selected department.
+            </p>
+
+
+            <!-- ================================= -->
+            <!-- YEAR -->
+            <!-- ================================= -->
+
+            <label class="title">
+                Select Year
+            </label>
+
+            <div class="checkbox-section">
+
+                <div class="checkbox-item">
+
+                    <input
+                        type="checkbox"
+                        name="year"
+                        value="1st Year"
+                        id="year1"
+                    >
+
+                    <label
+                        for="year1"
+                        style="margin:0; font-weight:normal;"
+                    >
+                        1st Year
+                    </label>
+
+                </div>
+
+
+                <div class="checkbox-item">
+
+                    <input
+                        type="checkbox"
+                        name="year"
+                        value="2nd Year"
+                        id="year2"
+                    >
+
+                    <label
+                        for="year2"
+                        style="margin:0; font-weight:normal;"
+                    >
+                        2nd Year
+                    </label>
+
+                </div>
+
+
+                <div class="checkbox-item">
+
+                    <input
+                        type="checkbox"
+                        name="year"
+                        value="3rd Year"
+                        id="year3"
+                    >
+
+                    <label
+                        for="year3"
+                        style="margin:0; font-weight:normal;"
+                    >
+                        3rd Year
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- EXAM DATE -->
+            <!-- ================================= -->
+
+            <label
+                class="title"
+                for="exam_date"
+            >
+                Exam Date
+            </label>
+
+            <input
+                type="date"
+                id="exam_date"
+                name="exam_date"
+                required
+            >
+
+
+            <!-- ================================= -->
+            <!-- START TIME -->
+            <!-- ================================= -->
+
+            <label class="title">
+                Start Time
+            </label>
+
+            <div class="time-row">
+
+                <!-- HOUR -->
+
+                <select
+                    name="start_hour"
+                    id="start_hour"
+                    required
+                >
+
+                    <option value="">
+                        Hour
+                    </option>
+
+                    {% for h in range(1, 13) %}
+
+                    <option value="{{ '%02d' % h }}">
+                        {{ h }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <!-- MINUTE -->
+
+                <select
+                    name="start_minute"
+                    id="start_minute"
+                    required
+                >
+
+                    <option value="">
+                        Min
+                    </option>
+
+                    <option value="00">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+
+                </select>
+
+
+                <!-- AM PM -->
+
+                <select
+                    name="start_ampm"
+                    id="start_ampm"
+                    required
+                >
+
+                    <option value="">
+                        AM / PM
+                    </option>
+
+                    <option value="AM">
+                        AM
+                    </option>
+
+                    <option value="PM">
+                        PM
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- END TIME -->
+            <!-- ================================= -->
+
+            <label class="title">
+                End Time
+            </label>
+
+            <div class="time-row">
+
+                <!-- HOUR -->
+
+                <select
+                    name="end_hour"
+                    id="end_hour"
+                    required
+                >
+
+                    <option value="">
+                        Hour
+                    </option>
+
+                    {% for h in range(1, 13) %}
+
+                    <option value="{{ '%02d' % h }}">
+                        {{ h }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+
+                <!-- MINUTE -->
+
+                <select
+                    name="end_minute"
+                    id="end_minute"
+                    required
+                >
+
+                    <option value="">
+                        Min
+                    </option>
+
+                    <option value="00">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+
+                </select>
+
+
+                <!-- AM PM -->
+
+                <select
+                    name="end_ampm"
+                    id="end_ampm"
+                    required
+                >
+
+                    <option value="">
+                        AM / PM
+                    </option>
+
+                    <option value="AM">
+                        AM
+                    </option>
+
+                    <option value="PM">
+                        PM
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- SAVE -->
+            <!-- ================================= -->
+
+            <button
+                type="submit"
+                class="save-btn"
+            >
+                Save Timetable
+            </button>
+
+
+        </form>
+
+
+        <a
+            href="{{ url_for('admin_dashboard') }}"
+            class="back"
+        >
+            ← Back to Admin Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* ==========================================
+   DEPARTMENT → COURSE
+   ========================================== */
+
+const departmentCheckboxes =
+    document.querySelectorAll(
+        ".department-checkbox"
+    );
+
+const courseItems =
+    document.querySelectorAll(
+        ".course-item"
+    );
+
+
+departmentCheckboxes.forEach(
+    function(checkbox) {
+
+        checkbox.addEventListener(
+            "change",
+            function() {
+
+                const selectedDepartments = [];
+
+
+                departmentCheckboxes.forEach(
+                    function(item) {
+
+                        if (item.checked) {
+
+                            selectedDepartments.push(
+                                item.dataset.department
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                courseItems.forEach(
+                    function(item) {
+
+                        const courseDepartment =
+                            item.dataset.courseDepartment;
+
+                        const courseCheckbox =
+                            item.querySelector(
+                                ".course-checkbox"
+                            );
+
+
+                        if (
+                            selectedDepartments.includes(
+                                courseDepartment
+                            )
+                        ) {
+
+                            item.style.display =
+                                "flex";
+
+                        } else {
+
+                            item.style.display =
+                                "none";
+
+                            courseCheckbox.checked =
+                                false;
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* ==========================================
+   TIME VALIDATION
+   ========================================== */
+
+function convertToMinutes(
+    hour,
+    minute,
+    ampm
+) {
+
+    hour = parseInt(hour);
+    minute = parseInt(minute);
+
+
+    if (ampm === "AM") {
+
+        if (hour === 12) {
+            hour = 0;
+        }
+
+    } else {
+
+        if (hour !== 12) {
+            hour += 12;
+        }
+
+    }
+
+
+    return (
+        hour * 60 + minute
+    );
+
+}
+
+
+/* ==========================================
+   FORM VALIDATION
+   ========================================== */
+
+const form =
+    document.querySelector("form");
+
+
+form.addEventListener(
+    "submit",
+    function(event) {
+
+
+        /* DEPARTMENT */
+
+        const departments =
+            document.querySelectorAll(
+                ".department-checkbox:checked"
+            );
+
+
+        if (departments.length === 0) {
+
+            alert(
+                "Please select at least one department."
+            );
+
+            event.preventDefault();
+
+            return;
+
+        }
+
+
+        /* COURSE */
+
+        const courses =
+            document.querySelectorAll(
+                ".course-checkbox:checked"
+            );
+
+
+        if (courses.length === 0) {
+
+            alert(
+                "Please select at least one course."
+            );
+
+            event.preventDefault();
+
+            return;
+
+        }
+
+
+        /* YEAR */
+
+        const years =
+            document.querySelectorAll(
+                'input[name="year"]:checked'
+            );
+
+
+        if (years.length === 0) {
+
+            alert(
+                "Please select at least one year."
+            );
+
+            event.preventDefault();
+
+            return;
+
+        }
+
+
+        /* TIME */
+
+        const startHour =
+            document.getElementById(
+                "start_hour"
+            ).value;
+
+        const startMinute =
+            document.getElementById(
+                "start_minute"
+            ).value;
+
+        const startAmPm =
+            document.getElementById(
+                "start_ampm"
+            ).value;
+
+
+        const endHour =
+            document.getElementById(
+                "end_hour"
+            ).value;
+
+        const endMinute =
+            document.getElementById(
+                "end_minute"
+            ).value;
+
+        const endAmPm =
+            document.getElementById(
+                "end_ampm"
+            ).value;
+
+
+        const startTotal =
+            convertToMinutes(
+                startHour,
+                startMinute,
+                startAmPm
+            );
+
+
+        const endTotal =
+            convertToMinutes(
+                endHour,
+                endMinute,
+                endAmPm
+            );
+
+
+        if (endTotal <= startTotal) {
+
+            alert(
+                "End Time must be later than Start Time."
+            );
+
+            event.preventDefault();
+
+            return;
+
+        }
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

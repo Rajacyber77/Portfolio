@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>View Time Table</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+        }
+
+        h1 {
+            text-align: center;
+            color: #d97706;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #d97706;
+            color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #d97706;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background: #b45309;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #d97706;
+            text-decoration: none;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>
+        My Uploaded Time Tables
+    </h1>
+
+
+    {% if timetables %}
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Department
+                </th>
+
+                <th>
+                    Course
+                </th>
+
+                <th>
+                    Year
+                </th>
+
+                <th>
+                    File
+                </th>
+
+                <th>
+                    Action
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        {% for timetable in timetables %}
+
+            <tr>
+
+                <td>
+                    {{ timetable.department }}
+                </td>
+
+                <td>
+                    {{ timetable.course }}
+                </td>
+
+                <td>
+                    {{ timetable.year }}
+                </td>
+
+                <td>
+                    {{ timetable.file_name }}
+                </td>
+
+                <td>
+
+                    <a
+                        href="{{ url_for(
+                            'download_faculty_timetables',
+                            filename=timetable.file_name
+                        ) }}"
+                        class="btn"
+                    >
+                        View / Download
+                    </a>
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+
+    {% else %}
+
+        <div class="empty">
+
+            No timetable uploaded by you.
+
+        </div>
+
+    {% endif %}
+
+
+    <a
+        href="{{ url_for('faculty_dashboard') }}"
+        class="back"
+    >
+        ← Back to Faculty Dashboard
+    </a>
+
+</div>
+
+</body>
+
+</html>

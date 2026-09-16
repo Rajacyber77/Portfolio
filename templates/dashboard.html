@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        header {
+            background: #1f3c88;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .card {
+            display: inline-block;
+            width: 200px;
+            margin: 15px;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 8px #ccc;
+        }
+
+        .card h3 {
+            color: #1f3c88;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #1f3c88;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Admin Dashboard</h1>
+        <p>College Examination Cell</p>
+    </header>
+
+    <div class="container">
+
+        <div class="card">
+            <h3>Students</h3>
+            <p>Manage Student Details</p>
+            <a href="/students">
+            <button>Manage</button>
+            </a>
+        </div>
+
+        <div class="card">
+            <h3>Halls</h3>
+            <p>Manage Exam Halls</p>
+            <button>Manage</button>
+        </div>
+
+        <div class="card">
+            <h3>Exams</h3>
+            <p>Manage Exam Details</p>
+            <button>Manage</button>
+        </div>
+
+        <div class="card">
+            <h3>Allotment</h3>
+            <p>Generate Hall Allotment</p>
+            <button>Generate</button>
+        </div>
+
+    </div>
+
+</body>
+</html>

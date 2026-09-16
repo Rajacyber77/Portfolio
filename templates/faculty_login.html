@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Faculty Login</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #f4f7fb;
+        }
+
+        /* =========================
+           LOGIN BOX
+           ========================= */
+
+        .login-box {
+
+            width: 380px;
+
+            background: white;
+
+            padding: 32px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.12);
+        }
+
+
+        /* =========================
+           TITLE
+           ========================= */
+
+        h1 {
+
+            text-align: center;
+
+            color: #173b7a;
+
+            margin-bottom: 8px;
+        }
+
+
+        .subtitle {
+
+            text-align: center;
+
+            color: #666;
+
+            margin-bottom: 25px;
+        }
+
+
+        /* =========================
+           LABEL
+           ========================= */
+
+        label {
+
+            display: block;
+
+            font-weight: bold;
+
+            margin: 15px 0 7px;
+        }
+
+
+        /* =========================
+           INPUT
+           ========================= */
+
+        input {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 6px;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+
+        input:focus {
+
+            border-color: #173b7a;
+
+            box-shadow:
+                0 0 0 2px rgba(23, 59, 122, 0.1);
+        }
+
+
+        /* =========================
+           LOGIN BUTTON
+           ========================= */
+
+        button {
+
+            width: 100%;
+
+            margin-top: 22px;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 6px;
+
+            background: #173b7a;
+
+            color: white;
+
+            font-size: 15px;
+
+            cursor: pointer;
+        }
+
+
+        button:hover {
+
+            background: #102d5f;
+        }
+
+
+        /* =========================
+           ERROR MESSAGE
+           ========================= */
+
+        .error {
+
+            margin-bottom: 15px;
+
+            padding: 10px;
+
+            border-radius: 6px;
+
+            background: #ffebee;
+
+            color: #c62828;
+
+            text-align: center;
+
+            font-size: 14px;
+        }
+
+
+        /* =========================
+           INFORMATION BOX
+           ========================= */
+
+        .info {
+
+            margin-top: 18px;
+
+            padding: 12px;
+
+            background: #eef4ff;
+
+            border-radius: 6px;
+
+            color: #555;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        .info strong {
+
+            color: #173b7a;
+        }
+
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         FACULTY LOGIN BOX
+         ========================================= -->
+
+    <div class="login-box">
+
+
+        <!-- TITLE -->
+
+        <h1>
+            Faculty Login
+        </h1>
+
+
+        <p class="subtitle">
+            College Examination Cell
+        </p>
+
+
+
+        <!-- =====================================
+             ERROR MESSAGE
+             ===================================== -->
+
+        {% if error %}
+
+        <div class="error">
+
+            {{ error }}
+
+        </div>
+
+        {% endif %}
+
+
+
+        <!-- =====================================
+             LOGIN FORM
+             ===================================== -->
+
+        <form
+            method="POST"
+            action="{{ url_for('faculty_login') }}"
+        >
+
+
+            <!-- =================================
+                 FACULTY ID
+                 ================================= -->
+
+            <label for="faculty_id">
+
+                Faculty ID
+
+            </label>
+
+
+            <input
+                type="text"
+                id="faculty_id"
+                name="faculty_code"
+                placeholder="Example: FAC001"
+                autocomplete="username"
+                required
+            >
+
+
+
+            <!-- =================================
+                 PASSWORD
+                 ================================= -->
+
+            <label for="password">
+
+                Password
+
+            </label>
+
+
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter password"
+                autocomplete="current-password"
+                required
+            >
+
+
+
+            <!-- =================================
+                 LOGIN BUTTON
+                 ================================= -->
+
+            <button type="submit">
+
+                Login
+
+            </button>
+
+
+        </form>
+
+
+
+        <!-- =====================================
+             FIRST LOGIN INFORMATION
+             ===================================== -->
+
+        <div class="info">
+
+            <strong>
+                First Login:
+            </strong>
+
+            <br>
+
+            Faculty ID = Your uploaded Faculty ID
+
+           <br>
+
+            After successful login, you can change
+            your password from the Faculty Dashboard.
+
+        </div>
+
+
+    </div>
+
+
+</body>
+
+</html>

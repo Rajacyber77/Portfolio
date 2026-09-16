@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Status - Hall Allotment System</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f4f6f9;
+
+            color: #222;
+        }
+
+
+        /* ==================================================
+           HEADER
+           ================================================== */
+
+        header {
+
+            background: #173b7a;
+
+            color: white;
+
+            padding: 18px 35px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+
+        header h1 {
+
+            margin: 0;
+
+            font-size: 25px;
+        }
+
+
+        header p {
+
+            margin: 5px 0 0;
+
+            font-size: 14px;
+
+            opacity: 0.9;
+        }
+
+
+        .back-btn {
+
+            text-decoration: none;
+
+            color: white;
+
+            background: #102d5f;
+
+            padding: 10px 18px;
+
+            border-radius: 5px;
+
+            font-size: 14px;
+        }
+
+
+        .back-btn:hover {
+
+            background: #0b234c;
+        }
+
+
+        /* ==================================================
+           MAIN SECTION
+           ================================================== */
+
+        .container {
+
+            width: 95%;
+
+            max-width: 1200px;
+
+            margin: 35px auto;
+        }
+
+
+        .page-title {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 25px;
+        }
+
+
+        .page-title h2 {
+
+            margin: 0 0 8px;
+
+            color: #173b7a;
+
+            font-size: 24px;
+        }
+
+
+        .page-title p {
+
+            margin: 0;
+
+            color: #666;
+
+            font-size: 14px;
+        }
+
+
+        /* ==================================================
+           SEARCH BOX
+           ================================================== */
+
+        .search-card {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 25px;
+        }
+
+
+        .search-card label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+
+            color: #333;
+        }
+
+
+        .search-box {
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+
+        .search-box input {
+
+            flex: 1;
+
+            padding: 13px 15px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+
+        .search-box input:focus {
+
+            border-color: #173b7a;
+
+            box-shadow:
+                0 0 0 2px
+                rgba(23, 59, 122, 0.10);
+        }
+
+
+        .search-box button {
+
+            padding: 13px 24px;
+
+            border: none;
+
+            background: #173b7a;
+
+            color: white;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            font-weight: 600;
+        }
+
+
+        .search-box button:hover {
+
+            background: #102d5f;
+        }
+
+
+        .search-hint {
+
+            margin-top: 10px;
+
+            font-size: 13px;
+
+            color: #777;
+        }
+
+
+        /* ==================================================
+           ERROR
+           ================================================== */
+
+        .error-box {
+
+            background: #ffe8e8;
+
+            border: 1px solid #e0a0a0;
+
+            color: #a00000;
+
+            padding: 14px 16px;
+
+            border-radius: 6px;
+
+            margin-bottom: 20px;
+        }
+
+
+        /* ==================================================
+           RESULT CARD
+           ================================================== */
+
+        .result-card {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0, 0, 0, 0.08);
+        }
+
+
+        .result-title {
+
+            margin: 0 0 18px;
+
+            color: #173b7a;
+
+            font-size: 20px;
+        }
+
+
+        /* ==================================================
+           FACULTY NAME
+           ================================================== */
+
+        .faculty-result {
+
+            margin-bottom: 20px;
+
+            padding: 14px 16px;
+
+            background: #f5f7fb;
+
+            border-left: 4px solid #173b7a;
+
+            border-radius: 5px;
+
+            font-size: 16px;
+        }
+
+
+        .faculty-result strong {
+
+            margin-right: 8px;
+
+            color: #333;
+        }
+
+
+        .faculty-name {
+
+            color: #173b7a;
+
+            font-weight: 700;
+        }
+
+
+        /* ==================================================
+           TABLE
+           ================================================== */
+
+        .table-container {
+
+            width: 100%;
+
+            overflow-x: auto;
+        }
+
+
+        .status-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 800px;
+        }
+
+
+        .status-table th {
+
+            background: #173b7a;
+
+            color: white;
+
+            padding: 13px 12px;
+
+            border: 1px solid #173b7a;
+
+            text-align: center;
+
+            font-size: 14px;
+
+            white-space: nowrap;
+        }
+
+
+        .status-table td {
+
+            padding: 13px 12px;
+
+            border: 1px solid #ddd;
+
+            text-align: center;
+
+            font-size: 14px;
+
+            vertical-align: middle;
+        }
+
+
+        .status-table tbody tr:nth-child(even) {
+
+            background: #f8f9fb;
+        }
+
+
+        .status-table tbody tr:hover {
+
+            background: #eef3fb;
+        }
+
+
+        .status-table td:first-child {
+
+            font-weight: 600;
+
+            text-align: left;
+        }
+
+
+        /* ==================================================
+           NO RESULT
+           ================================================== */
+
+        .no-result {
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0, 0, 0, 0.08);
+
+            text-align: center;
+
+            color: #666;
+
+            font-size: 15px;
+        }
+
+
+        /* ==================================================
+           FOOTER
+           ================================================== */
+
+        footer {
+
+            margin-top: 40px;
+
+            padding: 20px;
+
+            background: #173b7a;
+
+            color: white;
+
+            text-align: center;
+        }
+
+
+        footer p {
+
+            margin: 4px 0;
+
+            font-size: 13px;
+
+            opacity: 0.9;
+        }
+
+
+        /* ==================================================
+           MOBILE
+           ================================================== */
+
+        @media (max-width: 700px) {
+
+            header {
+
+                padding: 15px 18px;
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 12px;
+            }
+
+
+            header h1 {
+
+                font-size: 21px;
+            }
+
+
+            .container {
+
+                width: 94%;
+
+                margin: 20px auto;
+            }
+
+
+            .search-box {
+
+                flex-direction: column;
+            }
+
+
+            .search-box button {
+
+                width: 100%;
+            }
+
+
+            .page-title,
+            .search-card,
+            .result-card {
+
+                padding: 18px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ==================================================
+         HEADER
+         ================================================== -->
+
+    <header>
+
+        <div>
+
+            <h1>
+                Status
+            </h1>
+
+            <p>
+                College Examination Cell
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('admin_dashboard') }}"
+            class="back-btn"
+        >
+            ← Back to Dashboard
+        </a>
+
+    </header>
+
+
+    <!-- ==================================================
+         MAIN
+         ================================================== -->
+
+    <main class="container">
+
+
+        <!-- ==================================================
+             PAGE TITLE
+             ================================================== -->
+
+        <div class="page-title">
+
+            <h2>
+                Hall / Faculty Status
+            </h2>
+
+            <p>
+                Search Hall / Faculty, or search the Exam Timetable by Exam Date or Course.
+            </p>
+
+        </div>
+
+
+        <!-- ==================================================
+             SEARCH
+             ================================================== -->
+
+        <div class="search-card">
+
+            <form action="{{ url_for('status') }}" method="GET">
+
+                <label for="search_type">Search Type</label>
+
+                <select id="search_type" name="search_type" style="width:100%;padding:13px 15px;border:1px solid #ccc;border-radius:5px;font-size:15px;margin-bottom:12px;outline:none;">
+                    <option value="hall_faculty" {% if search_type == 'hall_faculty' or not search_type %}selected{% endif %}>Hall Name / Faculty Name</option>
+                    <option value="exam_date" {% if search_type == 'exam_date' %}selected{% endif %}>Exam Date (Timetable)</option>
+                    <option value="course" {% if search_type == 'course' %}selected{% endif %}>Course (Timetable)</option>
+                    <option value="date_course" {% if search_type == 'date_course' %}selected{% endif %}>Course + Exam Date (Timetable)</option>
+                </select>
+
+                <label for="search">Search</label>
+
+                <div class="search-box">
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
+                        placeholder="Hall / Faculty / Course / Exam Date"
+                        value="{{ search or '' }}"
+                        required
+                        autocomplete="off"
+                    >
+                    <button type="submit">🔍 Search</button>
+                </div>
+
+                <div class="search-hint" id="searchHint">
+                    Hall/Faculty: AF1 or Faculty Name | Exam Date: 15-09-2026 | Course: BCA | Course + Date: BCA | 15-09-2026
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- ==================================================
+             ERROR MESSAGE
+             ================================================== -->
+
+        {% if status_error %}
+
+            <div class="error-box">
+
+                {{ status_error }}
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- ==================================================
+             SEARCH RESULT
+             ================================================== -->
+
+        {% if timetable_results %}
+
+            <div class="result-card">
+                <h3 class="result-title">Exam Timetable Results</h3>
+                <div class="table-container">
+                    <table class="status-table" style="min-width:1100px;">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Course</th>
+                                <th>Year</th>
+                                <th>Exam Date</th>
+                                <th>Exam Type</th>
+                                <th>Exam Name</th>
+                                <th>Sub. Code</th>
+                                <th>Subject</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in timetable_results %}
+                            <tr>
+                                <td>{{ row.department or '-' }}</td>
+                                <td>{{ row.course or '-' }}</td>
+                                <td>{{ row.year or '-' }}</td>
+                                <td>{{ row.exam_date or '-' }}</td>
+                                <td>{{ row.exam_type or '-' }}</td>
+                                <td>{{ row.exam_name or '-' }}</td>
+                                <td>{{ row.subject_code or '-' }}</td>
+                                <td style="text-align:left;white-space:normal;min-width:220px;">{{ row.subject or '-' }}</td>
+                                <td>{{ row.start_time or '-' }}</td>
+                                <td>{{ row.end_time or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        {% elif status_results %}
+
+            <div class="result-card">
+                <h3 class="result-title">Search Results</h3>
+
+                <div class="faculty-result">
+                    <strong>Faculty Name:</strong>
+                    {% set faculty_names = [] %}
+                    {% for row in status_results %}
+                        {% if row.faculty_name and row.faculty_name != '-' and row.faculty_name not in faculty_names %}
+                            {% set _ = faculty_names.append(row.faculty_name) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if faculty_names %}
+                        <span class="faculty-name">{{ faculty_names | join(', ') }}</span>
+                    {% else %}
+                        <span>-</span>
+                    {% endif %}
+                </div>
+
+                <div class="table-container">
+                    <table class="status-table">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Sub. Code</th>
+                                <th>Subject</th>
+                                <th>Strength</th>
+                                <th>Reg. No From</th>
+                                <th>Reg. No To</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in status_results %}
+                            <tr>
+                                <td>{{ row.course or '-' }}</td>
+                                <td>{{ row.subject_code or '-' }}</td>
+                                <td>{{ row.subject or '-' }}</td>
+                                <td>{{ row.strength or 0 }}</td>
+                                <td>{{ row.reg_no_from or '-' }}</td>
+                                <td>{{ row.reg_no_to or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        {% elif search %}
+
+            <div class="no-result">
+                No details found for <strong>{{ search }}</strong>.
+            </div>
+
+        {% endif %}
+
+    </main>
+
+
+    <!-- ==================================================
+         FOOTER
+         ================================================== -->
+
+    <footer>
+
+        <p>
+            © 2026 College Examination Cell
+        </p>
+
+        <p>
+            Hall Allotment Management System
+        </p>
+
+    </footer>
+
+
+<script>
+const typeEl = document.getElementById('search_type');
+const inputEl = document.getElementById('search');
+const hintEl = document.getElementById('searchHint');
+function updateSearchHelp() {
+    if (!typeEl) return;
+    if (typeEl.value === 'exam_date') {
+        inputEl.placeholder = 'DD-MM-YYYY (example: 15-09-2026)';
+        hintEl.textContent = 'Searches only the Exam Timetable. Example: 15-09-2026';
+    } else if (typeEl.value === 'course') {
+        inputEl.placeholder = 'Enter Course (example: BCA)';
+        hintEl.textContent = 'Searches only the Exam Timetable. Example: BCA';
+    } else if (typeEl.value === 'date_course') {
+        inputEl.placeholder = 'Course | DD-MM-YYYY (example: BCA | 15-09-2026)';
+        hintEl.textContent = 'Searches only the Exam Timetable. Format: Course | Exam Date';
+    } else {
+        inputEl.placeholder = 'Enter Hall Name or Faculty Name';
+        hintEl.textContent = 'Existing search: AF1 or Faculty Name';
+    }
+}
+typeEl.addEventListener('change', updateSearchHelp);
+updateSearchHelp();
+</script>
+</body>
+
+</html>

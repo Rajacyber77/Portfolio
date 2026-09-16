@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Exam Hall Attendance</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+    margin:0;
+    padding:25px;
+    color:#222;
+}
+
+.wrap{
+    max-width:1400px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 4px 18px rgba(0,0,0,.08);
+}
+
+h1{
+    text-align:center;
+    margin-top:0;
+}
+
+.top{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.course-year{
+    margin-top:30px;
+    margin-bottom:30px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:15px;
+}
+
+.course-year h2{
+    background:#222;
+    color:#fff;
+    padding:12px 16px;
+    border-radius:8px;
+    margin-top:0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:9px;
+    text-align:left;
+}
+
+th{
+    background:#eef1f6;
+}
+
+.attendance{
+    text-align:center;
+    width:130px;
+}
+
+.attendance-box{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.attendance-box input{
+    width:20px;
+    height:20px;
+    cursor:pointer;
+    accent-color:red;
+}
+
+.tick{
+    display:none;
+    color:red;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.attendance-box input:checked + .tick{
+    display:inline;
+}
+
+.absent-text{
+    color:red;
+    font-weight:bold;
+}
+
+.present-text{
+    color:#166534;
+    font-weight:bold;
+}
+
+.save{
+    margin-top:20px;
+    padding:11px 22px;
+    border:0;
+    border-radius:7px;
+    background:#222;
+    color:#fff;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+}
+
+.save:hover{
+    background:#444;
+}
+
+.msg{
+    background:#e9f8ed;
+    color:#166534;
+    padding:10px;
+    border-radius:6px;
+    margin-bottom:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+
+/* =====================================================
+   ADMIN CLOSED ATTENDANCE MESSAGE
+   ===================================================== */
+
+.closed-msg{
+    background:#fff1f2;
+    color:#b91c1c;
+    border:1px solid #fecaca;
+    padding:25px;
+    border-radius:10px;
+    margin:20px 0;
+    text-align:center;
+    font-weight:bold;
+}
+
+.closed-msg h2{
+    margin-top:0;
+    margin-bottom:15px;
+    color:#b91c1c;
+}
+
+.closed-msg p{
+    margin:8px 0;
+    font-weight:normal;
+    font-size:16px;
+}
+
+.closed-msg .hall-name{
+    font-weight:bold;
+    color:#991b1b;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="wrap">
+
+    <h1>Exam Hall Attendance</h1>
+
+
+    <div class="top">
+
+        <b>{{ faculty_name }}</b>
+
+        {% if faculty_code %}
+            ({{ faculty_code }})
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         ADMIN CLOSED MESSAGE
+         ===================================================== -->
+
+    {% if attendance_closed %}
+
+        <div class="closed-msg">
+
+            <h2>🔒 Attendance Closed</h2>
+
+            <p>
+                Dear <b>{{ faculty_name }}</b>,
+            </p>
+
+            <p>
+                Admin has closed attendance for
+                <span class="hall-name">
+                    {{ closed_hall_name }}
+                </span>.
+            </p>
+
+            <p>
+                You cannot open or submit attendance for this hall now.
+            </p>
+
+        </div>
+
+
+    {% else %}
+
+
+        {% if saved and saved != '0' %}
+
+            <div class="msg">
+                Attendance submitted successfully.
+            </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+
+
+        <!-- =====================================================
+             COURSE + YEAR WISE DISPLAY
+             ===================================================== -->
+
+        {% if grouped %}
+
+            {% for course_year, course_rows in grouped.items() %}
+
+                {% set course = course_year[0] %}
+                {% set year = course_year[1] %}
+
+
+                <div class="course-year">
+
+
+                    <!-- COURSE + YEAR + HALL HEADING -->
+
+                    <h2>
+
+                        COURSE: {{ course }}
+
+                        &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                        YEAR: {{ year }}
+
+                        &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                        HALL:
+                        {{ course_rows[0].hall_name if course_rows else '' }}
+
+                    </h2>
+
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Reg No</th>
+
+                                <th>Student Name</th>
+
+                                <th>Subject</th>
+
+                                <th>Seat No</th>
+
+                                <th class="attendance">
+                                    Attendance
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                        {% for row in course_rows %}
+
+                            <tr>
+
+
+                                <!-- REGISTER NUMBER -->
+
+                                <td>
+                                    {{ row.register_number }}
+                                </td>
+
+
+                                <!-- STUDENT NAME -->
+
+                                <td>
+                                    {{ row.student_name }}
+                                </td>
+
+
+                                <!-- SUBJECT -->
+
+                                <td>
+                                    {{ row.subject }}
+                                </td>
+
+
+                                <!-- SEAT NUMBER -->
+
+                                <td>
+                                    {{ row.seat_number }}
+                                </td>
+
+
+                                <!-- ATTENDANCE -->
+
+                                <td class="attendance">
+
+                                    <label class="attendance-box">
+
+                                        <input
+                                            type="checkbox"
+                                            name="attendance_{{ row.allotment_id }}"
+                                            value="absent"
+
+                                            {% if row.attendance_status|lower == 'absent' %}
+                                                checked
+                                            {% endif %}
+                                        >
+
+                                        <span class="tick">
+                                            ✓
+                                        </span>
+
+                                        <span class="absent-text">
+                                            Absent
+                                        </span>
+
+                                    </label>
+
+
+                                    <div
+                                        class="present-text"
+
+                                        {% if row.attendance_status|lower == 'absent' %}
+                                            style="display:none"
+                                        {% endif %}
+                                    >
+
+                                        Present
+
+                                    </div>
+
+                                </td>
+
+
+                            </tr>
+
+                        {% endfor %}
+
+
+                        </tbody>
+
+                    </table>
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+        {% elif rows %}
+
+
+            <!-- =================================================
+                 FALLBACK
+                 ================================================= -->
+
+            <div class="course-year">
+
+
+                <h2>
+
+                    COURSE:
+                    {{ rows[0].course if rows else '' }}
+
+                    &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                    YEAR:
+                    {{ rows[0].year if rows else '' }}
+
+                    &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                    HALL:
+                    {{ rows[0].hall_name if rows else '' }}
+
+                </h2>
+
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Reg No</th>
+
+                            <th>Student Name</th>
+
+                            <th>Subject</th>
+
+                            <th>Seat No</th>
+
+                            <th class="attendance">
+                                Attendance
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                    {% for row in rows %}
+
+                        <tr>
+
+
+                            <!-- REGISTER NUMBER -->
+
+                            <td>
+                                {{ row.register_number }}
+                            </td>
+
+
+                            <!-- STUDENT NAME -->
+
+                            <td>
+                                {{ row.student_name }}
+                            </td>
+
+
+                            <!-- SUBJECT -->
+
+                            <td>
+                                {{ row.subject }}
+                            </td>
+
+
+                            <!-- SEAT NUMBER -->
+
+                            <td>
+                                {{ row.seat_number }}
+                            </td>
+
+
+                            <!-- ATTENDANCE -->
+
+                            <td class="attendance">
+
+                                <label class="attendance-box">
+
+                                    <input
+                                        type="checkbox"
+                                        name="attendance_{{ row.allotment_id }}"
+                                        value="absent"
+
+                                        {% if row.attendance_status|lower == 'absent' %}
+                                            checked
+                                        {% endif %}
+                                    >
+
+                                    <span class="tick">
+                                        ✓
+                                    </span>
+
+                                    <span class="absent-text">
+                                        Absent
+                                    </span>
+
+                                </label>
+
+
+                                <div
+                                    class="present-text"
+
+                                    {% if row.attendance_status|lower == 'absent' %}
+                                        style="display:none"
+                                    {% endif %}
+                                >
+
+                                    Present
+
+                                </div>
+
+                            </td>
+
+
+                        </tr>
+
+                    {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+
+            </div>
+
+
+        {% else %}
+
+
+            <p>
+                No students are assigned to you.
+            </p>
+
+
+        {% endif %}
+
+
+        {% if rows %}
+
+            <button
+                class="save"
+                type="submit"
+            >
+                Submit Attendance
+            </button>
+
+        {% endif %}
+
+
+        </form>
+
+
+    {% endif %}
+
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Question Paper Upload</title>
+
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 30px 0;
+        }
+
+
+        .container {
+            width: 450px;
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.12);
+        }
+
+
+        h1 {
+            text-align: center;
+
+            color: #d97706;
+
+            margin-bottom: 8px;
+        }
+
+
+        .subtitle {
+            text-align: center;
+
+            color: #666;
+
+            margin-bottom: 30px;
+        }
+
+
+        label {
+            display: block;
+
+            margin-top: 15px;
+
+            margin-bottom: 6px;
+
+            font-weight: bold;
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            font-size: 15px;
+
+            background: white;
+        }
+
+
+        input:focus,
+        select:focus {
+
+            outline: none;
+
+            border-color: #d97706;
+        }
+
+
+        .upload-btn {
+
+            width: 100%;
+
+            padding: 13px;
+
+            margin-top: 25px;
+
+            border: none;
+
+            border-radius: 5px;
+
+            background: #d97706;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        .upload-btn:hover {
+
+            background: #b45309;
+        }
+
+
+        .success {
+
+            margin-bottom: 20px;
+
+            padding: 12px;
+
+            background: #dcfce7;
+
+            color: #166534;
+
+            border-radius: 5px;
+
+            text-align: center;
+        }
+
+
+        .error {
+
+            margin-bottom: 20px;
+
+            padding: 12px;
+
+            background: #fee2e2;
+
+            color: #b91c1c;
+
+            border-radius: 5px;
+
+            text-align: center;
+        }
+
+
+        .back {
+
+            display: block;
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #d97706;
+
+            text-decoration: none;
+        }
+
+
+        .back:hover {
+
+            text-decoration: underline;
+        }
+
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- TITLE -->
+
+    <h1>
+        Question Paper Upload
+    </h1>
+
+
+    <p class="subtitle">
+        College Examination Cell
+    </p>
+
+
+
+    <!-- SUCCESS MESSAGE -->
+
+    {% if success %}
+
+    <div class="success">
+
+        {{ success }}
+
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- ERROR MESSAGE -->
+
+    {% if error %}
+
+    <div class="error">
+
+        {{ error }}
+
+    </div>
+
+    {% endif %}
+
+
+
+    <!-- FORM -->
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+
+
+        <!-- ====================================== -->
+        <!-- DEPARTMENT -->
+        <!-- ====================================== -->
+
+        <label for="department">
+
+            Department
+
+        </label>
+
+
+        <select
+            id="department"
+            name="department"
+            required
+            onchange="filterCourses()"
+        >
+
+            <option value="">
+
+                Select Department
+
+            </option>
+
+
+            {% for dept in departments %}
+
+            <option
+                value="{{ dept.department }}"
+            >
+
+                {{ dept.department }}
+
+            </option>
+
+            {% endfor %}
+
+
+        </select>
+
+
+
+        <!-- ====================================== -->
+        <!-- COURSE -->
+        <!-- ====================================== -->
+
+        <label for="course">
+
+            Course
+
+        </label>
+
+
+        <select
+            id="course"
+            name="course"
+            required
+            onchange="filterYears()"
+        >
+
+            <option value="">
+
+                Select Course
+
+            </option>
+
+
+            {% for c in courses %}
+
+            <option
+                value="{{ c.course }}"
+                data-department="{{ c.department }}"
+            >
+
+                {{ c.course }}
+
+            </option>
+
+            {% endfor %}
+
+
+        </select>
+
+
+
+        <!-- ====================================== -->
+        <!-- YEAR -->
+        <!-- ====================================== -->
+
+        <label for="year">
+
+            Year
+
+        </label>
+
+
+        <select
+            id="year"
+            name="year"
+            required
+        >
+
+            <option value="">
+
+                Select Year
+
+            </option>
+
+
+        </select>
+
+
+
+        <!-- ====================================== -->
+        <!-- SUBJECT -->
+        <!-- ====================================== -->
+
+        <label for="subject">
+
+            Subject Code
+
+        </label>
+
+
+        <input
+            type="text"
+            id="subject"
+            name="subject"
+            placeholder="Enter subject code"
+            required
+        >
+
+
+
+        <!-- ====================================== -->
+        <!-- SUBJECT NAME -->
+        <!-- ====================================== -->
+
+        <label for="subject_name">
+
+            Subject Name
+
+        </label>
+
+
+        <input
+            type="text"
+            id="subject_name"
+            name="subject_name"
+            placeholder="Enter subject name"
+            required
+        >
+
+
+
+        <!-- ====================================== -->
+        <!-- TOTAL STRENGTH -->
+        <!-- ====================================== -->
+
+        <label for="total_strength">
+
+            Total Strength
+
+        </label>
+
+
+        <input
+            type="number"
+            id="total_strength"
+            name="total_strength"
+            placeholder="Enter total student strength"
+            min="1"
+            required
+        >
+
+
+
+        <!-- ====================================== -->
+        <!-- EXAM DATE -->
+        <!-- ====================================== -->
+
+        <label for="exam_date">
+
+            Exam Date
+
+        </label>
+
+
+        <input
+            type="date"
+            id="exam_date"
+            name="exam_date"
+            required
+        >
+
+
+
+        <!-- ====================================== -->
+        <!-- QUESTION PAPER -->
+        <!-- ====================================== -->
+
+        <label for="question_paper">
+
+            Select Question Paper
+
+        </label>
+
+
+        <input
+            type="file"
+            id="question_paper"
+            name="question_paper"
+            accept=".pdf,.doc,.docx"
+            required
+        >
+
+
+
+        <!-- ====================================== -->
+        <!-- UPLOAD BUTTON -->
+        <!-- ====================================== -->
+
+        <button
+            type="submit"
+            class="upload-btn"
+        >
+
+            Upload Question Paper
+
+        </button>
+
+
+    </form>
+
+
+
+    <!-- ====================================== -->
+    <!-- BACK BUTTON -->
+    <!-- ====================================== -->
+
+    <a
+        href="{{ url_for('faculty_dashboard') }}"
+        class="back"
+    >
+
+        ← Back to Faculty Dashboard
+
+    </a>
+
+
+</div>
+
+
+
+<!-- ========================================== -->
+<!-- JAVASCRIPT -->
+<!-- DEPARTMENT → COURSE → YEAR -->
+<!-- ========================================== -->
+
+<script>
+
+
+/* ==================================================
+   STUDENT ACADEMIC DATA FROM DATABASE
+   ================================================== */
+
+const studentAcademicData = [
+
+    {% for row in student_academic_data %}
+
+    {
+        department:
+            {{ row.department | tojson }},
+
+        course:
+            {{ row.course | tojson }},
+
+        year:
+            {{ row.year | tojson }}
+    }
+
+    {% if not loop.last %},{% endif %}
+
+    {% endfor %}
+
+];
+
+
+
+/* ==================================================
+   DEPARTMENT → COURSE
+   ================================================== */
+
+function filterCourses() {
+
+    const departmentSelect =
+        document.getElementById("department");
+
+    const courseSelect =
+        document.getElementById("course");
+
+    const yearSelect =
+        document.getElementById("year");
+
+
+    const selectedDepartment =
+        departmentSelect.value;
+
+
+    /*
+     * Reset Course
+     */
+
+    courseSelect.value = "";
+
+
+
+    /*
+     * Reset Year
+     */
+
+    yearSelect.innerHTML = `
+        <option value="">
+            Select Year
+        </option>
+    `;
+
+
+
+    /*
+     * Show / Hide Courses
+     */
+
+    const courseOptions =
+        courseSelect.querySelectorAll(
+            "option"
+        );
+
+
+    courseOptions.forEach(
+        function(option) {
+
+            /*
+             * Keep Select Course
+             */
+
+            if (option.value === "") {
+
+                option.style.display =
+                    "block";
+
+                return;
+
+            }
+
+
+            const courseDepartment =
+                option.getAttribute(
+                    "data-department"
+                );
+
+
+            /*
+             * Compare Department
+             */
+
+            if (
+                courseDepartment ===
+                selectedDepartment
+            ) {
+
+                option.style.display =
+                    "block";
+
+            }
+
+            else {
+
+                option.style.display =
+                    "none";
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* ==================================================
+   COURSE → YEAR
+   ================================================== */
+
+function filterYears() {
+
+    const department =
+        document.getElementById(
+            "department"
+        ).value;
+
+
+    const course =
+        document.getElementById(
+            "course"
+        ).value;
+
+
+    const yearSelect =
+        document.getElementById(
+            "year"
+        );
+
+
+    /*
+     * Reset Year
+     */
+
+    yearSelect.innerHTML = `
+        <option value="">
+            Select Year
+        </option>
+    `;
+
+
+
+    /*
+     * Find Years From Database Data
+     */
+
+    const years = [];
+
+
+    studentAcademicData.forEach(
+        function(row) {
+
+            if (
+                row.department === department &&
+                row.course === course
+            ) {
+
+                if (
+                    !years.includes(
+                        row.year
+                    )
+                ) {
+
+                    years.push(
+                        row.year
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+
+    /*
+     * Add Database Years
+     */
+
+    years.forEach(
+        function(year) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value = year;
+
+
+            option.textContent =
+                year;
+
+
+            yearSelect.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>

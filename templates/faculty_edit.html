@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Faculty</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+        }
+
+        header {
+            background: #173b7a;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        .back {
+            color: white;
+            text-decoration: none;
+            border: 1px solid white;
+            padding: 9px 15px;
+            border-radius: 5px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .title {
+            text-align: center;
+            color: #173b7a;
+            margin-bottom: 25px;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 7px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+            background: white;
+        }
+
+        .update-btn {
+            width: 100%;
+            margin-top: 25px;
+            padding: 13px;
+            border: none;
+            border-radius: 5px;
+            background: #173b7a;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .update-btn:hover {
+            background: #102d5f;
+        }
+
+        .cancel {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #173b7a;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #b00020;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header>
+
+    <div>
+        <h1>Edit Faculty</h1>
+        <p>College Examination Cell</p>
+    </div>
+
+    <a href="{{ url_for('faculty_upload') }}" class="back">
+        ← Back
+    </a>
+
+</header>
+
+
+<div class="container">
+
+    <h2 class="title">
+        Edit Faculty Details
+    </h2>
+
+
+    <div class="box">
+
+        {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+
+
+            <!-- FACULTY NAME -->
+
+            <label>
+                Faculty Name
+            </label>
+
+            <input
+                type="text"
+                name="faculty_name"
+                value="{{ faculty.faculty_name }}"
+                required
+            >
+
+
+            <!-- DEPARTMENT -->
+
+            <label>
+                Department
+            </label>
+
+            <select name="department" required>
+
+                <option value="">
+                    Select Department
+                </option>
+
+                {% for item in departments %}
+
+                    {% if item.department_name == faculty.department %}
+
+                    <option value="{{ item.department_name }}" selected>
+                        {{ item.department_name }}
+                    </option>
+
+                    {% else %}
+
+                    <option value="{{ item.department_name }}">
+                        {{ item.department_name }}
+                    </option>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </select>
+
+
+            <!-- COURSE -->
+
+            <label>
+                Course
+            </label>
+
+            <select name="course" required>
+
+                <option value="">
+                    Select Course
+                </option>
+
+                {% for item in departments %}
+
+                    {% if item.course_name == faculty.course %}
+
+                    <option value="{{ item.course_name }}" selected>
+                        {{ item.course_name }}
+                    </option>
+
+                    {% else %}
+
+                    <option value="{{ item.course_name }}">
+                        {{ item.course_name }}
+                    </option>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </select>
+
+
+            
+
+
+            <button>
+                type="submit"
+                class="update-btn">
+
+                Update Faculty
+
+            </button>
+
+        </form>
+
+
+        <a
+            href="{{ url_for('faculty_upload') }}"
+            class="cancel">
+
+            Cancel
+
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
