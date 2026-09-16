@@ -61,6 +61,110 @@ def get_db_connection():
 
     return db
 
+
+# ==================================================
+# ROLE-BASED ACCESS CONTROL
+# ==================================================
+# Keep the existing application logic unchanged. This single
+# middleware layer protects the routes according to the login role.
+
+ADMIN_ROUTES = {
+    "/admin-hall", "/students", "/student-upload", "/students-upload",
+    "/delete-all-students", "/faculty-upload", "/hall-management",
+    "/hall-allotment", "/delete-total-hall-allotment",
+    "/admin-hall-allotment-pdf", "/hall-student-signature-pdf",
+    "/hall-faculty-signature-pdf", "/admin-seating-arrangement-pdf",
+    "/generate-hall-allotment", "/admin-timetable-upload",
+    "/question-paper-upload", "/question-papers", "/admin-attendance",
+    "/admin-attendance-pdf", "/arrear-hall-allotment",
+    "/delete-arrear-timetable", "/delete-arrear-student-database",
+    "/delete-total-arrear-hall-allotment", "/arrear-hall-allotment-pdf",
+    "/arrear-student-seating-pdf", "/arrear-hall-faculty-signature-pdf",
+}
+
+ADMIN_PREFIXES = (
+    "/delete-hall-allotment/",
+    "/hall-allotment-pdf/",
+    "/hall-student-signature-pdf/",
+    "/hall-faculty-signature-pdf/",
+    "/delete-question-paper/",
+    "/delete-exam-timetable/",
+    "/admin-attendance-close/",
+    "/admin-attendance-open/",
+    "/faculty-edit/",
+    "/faculty-delete/",
+    "/view-hall-file/",
+    "/delete-hall-file/",
+)
+
+FACULTY_ROUTES = {
+    "/faculty-dashboard", "/faculty-timetables", "/faculty-view-timetables",
+    "/faculty-attendance", "/faculty-attendance-submitted",
+    "/faculty-change-password",
+}
+
+FACULTY_PREFIXES = (
+    "/download-faculty-timetables/",
+    "/delete-faculty-timetables/",
+)
+
+STUDENT_ROUTES = {
+    "/student-dashboard", "/student-timetable", "/student-hall-pdf",
+}
+
+SHARED_AUTH_ROUTES = {
+    "/download-question-paper",
+}
+
+
+def _route_matches(path, exact_routes, prefixes):
+    return path in exact_routes or any(path.startswith(p) for p in prefixes)
+
+
+@app.before_request
+def enforce_role_access():
+    path = request.path
+
+    # Public routes: home + login/register/logout + health/status pages.
+    public_paths = {
+        "/", "/admin-login", "/admin-logout",
+        "/student-login", "/faculty-login", "/faculty-register",
+        "/faculty-logout", "/status",
+    }
+
+    if path in public_paths or path.startswith("/static/"):
+        return None
+
+    # Admin-only routes.
+    if _route_matches(path, ADMIN_ROUTES, ADMIN_PREFIXES):
+        if not session.get("admin_logged_in"):
+            return redirect(url_for("admin_login"))
+        return None
+
+    # Faculty-only routes.
+    if _route_matches(path, FACULTY_ROUTES, FACULTY_PREFIXES):
+        if not session.get("faculty_logged_in"):
+            return redirect(url_for("faculty_login"))
+        return None
+
+    # Student-only routes.
+    if _route_matches(path, STUDENT_ROUTES, ()):
+        if not session.get("student_register_number"):
+            return redirect(url_for("student_login"))
+        return None
+
+    # Files that can be used by more than one logged-in role.
+    if path.startswith("/uploads/") or _route_matches(path, SHARED_AUTH_ROUTES, ()):
+        if not (
+            session.get("admin_logged_in")
+            or session.get("faculty_logged_in")
+            or session.get("student_register_number")
+        ):
+            return redirect(url_for("student_login"))
+        return None
+
+    return None
+
 # ==================================================
 # HOME
 # ==================================================
@@ -10594,10 +10698,6 @@ def question_papers():
     methods=["POST"]
 )
 def delete_question_paper(paper_id):
-
-    # Admin authentication required for destructive action.
-    if not session.get("admin_logged_in"):
-        return redirect(url_for("admin_login"))
 
     db = None
     cursor = None
