@@ -10595,6 +10595,10 @@ def question_papers():
 )
 def delete_question_paper(paper_id):
 
+    # Admin authentication required for destructive action.
+    if not session.get("admin_logged_in"):
+        return redirect(url_for("admin_login"))
+
     db = None
     cursor = None
 
