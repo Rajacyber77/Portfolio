@@ -12,6 +12,7 @@ import mysql.connector
 import pandas as pd
 import re
 import os
+import traceback
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -9090,6 +9091,8 @@ def generate_hall_allotment():
     # ============================================================
 
     except Exception as e:
+        print("GENERATE HALL ALLOTMENT ERROR:", repr(e), flush=True)
+        traceback.print_exc()
 
         if db:
 
