@@ -16,7 +16,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "change-this-secret-key")
+app.secret_key = "hall_allotment_secret_key"
 
 # ==================================================
 # ADMIN LOGIN DETAILS
@@ -47,15 +47,17 @@ os.makedirs(
 # ==================================================
 # MYSQL DATABASE CONNECTION
 # ==================================================
-def get_db_connection():
+
+
+    def get_db_connection():
 
     db = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
+        host=os.getenv("DB_HOST"),
         port=int(os.getenv("DB_PORT", "3306")),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "exam_cell"),
-        connection_timeout=15
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        ssl_disabled=False
     )
 
     print("DATABASE:", db.database)
@@ -14286,8 +14288,9 @@ def arrear_hall_faculty_signature_pdf():
 if __name__ == "__main__":
 
     app.run(
-        host="0.0.0.0",
-        port=int(os.getenv("PORT", "5000")),
-        debug=os.getenv("FLASK_DEBUG", "0") == "1"
+        app.run(host="0.0.0.0", port=5000, debug=True),
+        host="127.0.0.1",
+        port=5000
     )
     
+Copy-Item ..\Hall_Allortment system\app.py .\app.py -Force
