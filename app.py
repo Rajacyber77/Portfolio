@@ -75,8 +75,9 @@ ADMIN_ROUTES = {
     "/admin-hall-allotment-pdf", "/hall-student-signature-pdf",
     "/hall-faculty-signature-pdf", "/admin-seating-arrangement-pdf",
     "/generate-hall-allotment", "/admin-timetable-upload",
-    "/question-paper-upload", "/question-papers", "/admin-attendance",
-    "/admin-attendance-pdf", "/admin-dashboard", "/test-db", "/change-admin-password",
+    "/admin-attendance", "/admin-attendance-pdf",
+    "/admin-attendance-close-all",
+    "/admin-dashboard", "/test-db", "/change-admin-password",
     "/arrear-hall-allotment",
     "/delete-arrear-timetable", "/delete-arrear-student-database",
     "/delete-total-arrear-hall-allotment", "/arrear-hall-allotment-pdf",
@@ -104,6 +105,7 @@ FACULTY_ROUTES = {
     "/faculty-dashboard", "/faculty-timetables", "/faculty-view-timetables",
     "/faculty-attendance", "/faculty-attendance-submitted",
     "/faculty-change-password",
+    "/question-paper-upload", "/question-papers",
 }
 
 FACULTY_PREFIXES = (
