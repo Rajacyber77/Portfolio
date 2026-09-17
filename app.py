@@ -11078,7 +11078,6 @@ def admin_timetable_upload():
                             UPLOAD_FOLDER
                         )
 
-
                     # ==================================================
                     # SAVE FILE
                     # ==================================================
@@ -11092,7 +11091,6 @@ def admin_timetable_upload():
                         upload_path
                     )
 
-
                     # ==================================================
                     # READ EXCEL
                     # ==================================================
@@ -11101,7 +11099,6 @@ def admin_timetable_upload():
                         upload_path,
                         header=0
                     )
-
 
                     # ==================================================
                     # CHECK COLUMNS
@@ -11114,7 +11111,6 @@ def admin_timetable_upload():
                             "Course, Year and date columns are required."
                         )
 
-
                     # ==================================================
                     # FIRST TWO COLUMNS
                     # ==================================================
@@ -11123,36 +11119,20 @@ def admin_timetable_upload():
 
                     year_column = df.columns[1]
 
-
                     total_subjects = 0
 
-
                     # ==================================================
-                    # IMPORTANT
-                    #
                     # REMOVE OLD TIMETABLE FOR SAME
                     # EXAM TYPE + EXAM NAME
-                    #
-                    # This prevents:
-                    #
-                    # B.SC CYBER SECURITY
-                    # +
-                    # CYBER SECURITY
-                    #
-                    # from appearing together when the same
-                    # exam timetable is uploaded again.
                     # ==================================================
 
                     cursor.execute(
                         """
                         DELETE FROM exam_timetable
-
                         WHERE
                             LOWER(TRIM(exam_type))
                                 = LOWER(TRIM(%s))
-
                             AND
-
                             LOWER(TRIM(exam_name))
                                 = LOWER(TRIM(%s))
                         """,
@@ -11161,7 +11141,6 @@ def admin_timetable_upload():
                             exam_name
                         )
                     )
-
 
                     # ==================================================
                     # REMOVE OLD UPLOADED FILE RECORD
@@ -11171,13 +11150,10 @@ def admin_timetable_upload():
                     cursor.execute(
                         """
                         DELETE FROM uploaded_exam_files
-
                         WHERE
                             LOWER(TRIM(exam_type))
                                 = LOWER(TRIM(%s))
-
                             AND
-
                             LOWER(TRIM(exam_name))
                                 = LOWER(TRIM(%s))
                         """,
@@ -11186,7 +11162,6 @@ def admin_timetable_upload():
                             exam_name
                         )
                     )
-
 
                     # ==================================================
                     # PROCESS EXCEL ROWS
@@ -11202,10 +11177,9 @@ def admin_timetable_upload():
                             row[year_column]
                         ).strip()
 
-
-                        # ------------------------------------------------
+                        # ==================================================
                         # SKIP EMPTY ROW
-                        # ------------------------------------------------
+                        # ==================================================
 
                         if (
                             course == ""
@@ -11219,7 +11193,6 @@ def admin_timetable_upload():
 
                             continue
 
-
                         # ==================================================
                         # PROCESS DATE COLUMNS
                         # ==================================================
@@ -11230,10 +11203,9 @@ def admin_timetable_upload():
                                 row[date_column]
                             )
 
-
-                            # ------------------------------------------------
+                            # ==================================================
                             # SKIP EMPTY SUBJECT
-                            # ------------------------------------------------
+                            # ==================================================
 
                             if pd.isna(
                                 subject_value
@@ -11241,21 +11213,17 @@ def admin_timetable_upload():
 
                                 continue
 
-
                             subject_text = str(
                                 subject_value
                             ).strip()
 
-
                             if (
                                 subject_text == ""
                                 or
-                                subject_text.lower()
-                                == "nan"
+                                subject_text.lower() == "nan"
                             ):
 
                                 continue
-
 
                             # ==================================================
                             # EXAM DATE
@@ -11265,14 +11233,11 @@ def admin_timetable_upload():
                                 date_column
                             ).date()
 
-
                             # ==================================================
                             # SUBJECT CODE + SUBJECT NAME
                             #
                             # Example:
-                            #
                             # 11T - TAMIL - I
-                            #
                             # ==================================================
 
                             parts = (
@@ -11282,10 +11247,9 @@ def admin_timetable_upload():
                                 )
                             )
 
-
                             if len(parts) == 2:
 
-                                subject_name = (
+                                subject_code = (
                                     parts[0].strip()
                                 )
 
@@ -11295,12 +11259,11 @@ def admin_timetable_upload():
 
                             else:
 
-                                subject_name = None
+                                subject_code = None
 
                                 subject_name = (
                                     subject_text
                                 )
-
 
                             # ==================================================
                             # INSERT
@@ -11321,13 +11284,10 @@ def admin_timetable_upload():
                                     exam_name,
                                     exam_start_date,
                                     exam_end_date,
-                                    subject_name,
                                     subject_name
                                 )
-
                                 VALUES
                                 (
-                                    %s,
                                     %s,
                                     %s,
                                     %s,
@@ -11346,7 +11306,7 @@ def admin_timetable_upload():
                                     "",
                                     course,
                                     year,
-                                    subject_name,
+                                    subject_code,
                                     exam_date,
                                     "00:00:00",
                                     "00:00:00",
@@ -11354,14 +11314,11 @@ def admin_timetable_upload():
                                     exam_name,
                                     exam_start_date,
                                     exam_end_date,
-                                    subject_name,
                                     subject_name
                                 )
                             )
 
-
                             total_subjects += 1
-
 
                     # ==================================================
                     # SAVE UPLOADED FILE DETAILS
@@ -11378,7 +11335,6 @@ def admin_timetable_upload():
                             file_name,
                             file_path
                         )
-
                         VALUES
                         (
                             %s,
@@ -11399,20 +11355,17 @@ def admin_timetable_upload():
                         )
                     )
 
-
                     # ==================================================
                     # COMMIT
                     # ==================================================
 
                     db.commit()
 
-
                     success = (
                         "Exam timetable uploaded successfully! "
                         + str(total_subjects)
                         + " timetable entries saved."
                     )
-
 
         # ==================================================
         # GET UPLOADED FILES
@@ -11421,23 +11374,14 @@ def admin_timetable_upload():
         cursor.execute(
             """
             SELECT
-
                 id,
-
                 exam_type,
-
                 exam_name,
-
                 exam_start_date,
-
                 exam_end_date,
-
                 file_name,
-
                 uploaded_at
-
             FROM uploaded_exam_files
-
             ORDER BY uploaded_at DESC
             """
         )
@@ -11446,21 +11390,16 @@ def admin_timetable_upload():
             cursor.fetchall()
         )
 
-
         # ==================================================
         # RENDER
         # ==================================================
 
         return render_template(
             "admin_timetable_upload.html",
-
             success=success,
-
             error=error,
-
             uploaded_files=uploaded_files
         )
-
 
     # ==================================================
     # ERROR
@@ -11471,27 +11410,20 @@ def admin_timetable_upload():
         if db:
 
             try:
-
                 db.rollback()
 
             except Exception:
-
                 pass
-
 
         return render_template(
             "admin_timetable_upload.html",
-
             success=None,
-
             error=(
                 "Error: "
                 + str(e)
             ),
-
             uploaded_files=[]
         )
-
 
     # ==================================================
     # CLOSE
@@ -11502,22 +11434,17 @@ def admin_timetable_upload():
         if cursor:
 
             try:
-
                 cursor.close()
 
             except Exception:
-
                 pass
-
 
         if db:
 
             try:
-
                 db.close()
 
             except Exception:
-
                 pass
 # ==================================================
 # DELETE EXAM TIMETABLE FILE
