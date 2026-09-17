@@ -13100,17 +13100,16 @@ def arrear_hall_allotment():
                     faculty_by_hall[hid] = int(raw_fid)
 
                 # ----------------------------------------------------
-                # Validate Exam Date
+                # Validate exam date
                 # ----------------------------------------------------
                 if (
                     not exam_date_text
                     or exam_date_text == "Select Exam Date"
                 ):
-                    raise ValueError("Please select an Exam Date.")
+                    raise ValueError(
+                        "Please select an Exam Date."
+                    )
 
-                # ----------------------------------------------------
-                # Validate halls
-                # ----------------------------------------------------
                 if not hall_ids:
                     raise ValueError(
                         "Please select at least one hall."
@@ -13121,11 +13120,18 @@ def arrear_hall_allotment():
                 )
 
                 if not exam_date:
-                    raise ValueError("Invalid exam date.")
+                    raise ValueError(
+                        "Invalid exam date."
+                    )
 
                 # ====================================================
-                # FETCH ARREAR STUDENTS FOR SELECTED EXAM DATE
+                # FETCH ARREAR STUDENTS FOR EXAM DATE
+                #
+                # IMPORTANT:
+                # Student subject_code is matched with
+                # Timetable subject_code.
                 # ====================================================
+
                 cur.execute(
                     """
                     SELECT
@@ -13134,10 +13140,13 @@ def arrear_hall_allotment():
                         s.course,
                         s.reg_no,
                         s.student_name,
+                        s.subject_code,
                         s.subject_name,
                         s.batch,
-                        t.subject_name,
+                        t.subject_code AS timetable_subject_code,
+                        t.subject_name AS timetable_subject_name,
                         t.subject_text
+
                     FROM arrear_students s
 
                     INNER JOIN (
@@ -13145,15 +13154,19 @@ def arrear_hall_allotment():
                             course,
                             batch,
                             exam_date,
+                            subject_code,
                             MAX(subject_name) AS subject_name,
                             MAX(subject_text) AS subject_text
+
                         FROM arrear_timetable
+
                         WHERE exam_date = %s
+
                         GROUP BY
                             course,
                             batch,
                             exam_date,
-                            subject_name
+                            subject_code
                     ) t
 
                         ON LOWER(TRIM(s.course))
@@ -13162,8 +13175,8 @@ def arrear_hall_allotment():
                        AND LOWER(TRIM(s.batch))
                            = LOWER(TRIM(t.batch))
 
-                       AND LOWER(TRIM(s.subject_name))
-                           = LOWER(TRIM(t.subject_name))
+                       AND LOWER(TRIM(s.subject_code))
+                           = LOWER(TRIM(t.subject_code))
 
                     ORDER BY
                         s.course,
@@ -13183,6 +13196,7 @@ def arrear_hall_allotment():
                 # ====================================================
                 # FETCH SELECTED HALLS
                 # ====================================================
+
                 placeholders = ",".join(
                     ["%s"] * len(hall_ids)
                 )
@@ -13210,6 +13224,7 @@ def arrear_hall_allotment():
                 # ====================================================
                 # VALIDATE FACULTY
                 # ====================================================
+
                 faculty_placeholders = ",".join(
                     ["%s"] * len(faculty_by_hall)
                 )
@@ -13256,7 +13271,7 @@ def arrear_hall_allotment():
                 # exam date and selected hall, remove only those
                 # Regular rows.
                 #
-                # Arrear students will occupy the first physical seats.
+                # Arrear students occupy the first physical seats.
                 #
                 # Example:
                 #
@@ -13276,6 +13291,7 @@ def arrear_hall_allotment():
                     f"""
                     DELETE a
                     FROM allotments a
+
                     INNER JOIN exam_timetable e
                         ON e.id = a.exam_id
 
@@ -13325,7 +13341,7 @@ def arrear_hall_allotment():
                     )
 
                 # ====================================================
-                # ALLOT STUDENTS
+                # ALLOT ARREAR STUDENTS
                 # ====================================================
 
                 hall_index = 0
@@ -13355,7 +13371,7 @@ def arrear_hall_allotment():
                     # ------------------------------------------------
                     # ARREAR FIRST
                     #
-                    # Arrear students occupy physical seats:
+                    # Arrear students occupy:
                     # 1, 2, 3, ... N
                     # ------------------------------------------------
 
@@ -13400,7 +13416,7 @@ def arrear_hall_allotment():
                     seat_no += 1
 
                 # ====================================================
-                # COMMIT ARREAR ALLOTMENT
+                # COMMIT
                 # ====================================================
 
                 db.commit()
@@ -13470,9 +13486,6 @@ def arrear_hall_allotment():
                             "NAME"
                         ],
 
-                        # IMPORTANT:
-                        # Subject code from Excel goes into
-                        # subject_code column.
                         "subject_code": [
                             "SUBJECT CODE",
                             "SUB CODE",
@@ -13575,34 +13588,37 @@ def arrear_hall_allotment():
                         if (
                             not department
                             or department.casefold() == "nan"
+
                             or not course
                             or course.casefold() == "nan"
+
                             or not reg_no
                             or reg_no.casefold() == "nan"
+
                             or not student_name
                             or student_name.casefold() == "nan"
+
                             or not subject_code
                             or subject_code.casefold() == "nan"
+
                             or not batch
                             or batch.casefold() == "nan"
                         ):
                             continue
 
                         # ------------------------------------------------
-                        # IMPORTANT FIX
+                        # IMPORTANT
                         #
-                        # Database has both:
+                        # Database contains:
                         #   subject_code
                         #   subject_name
                         #
-                        # Existing Arrear Hall Allotment logic uses
-                        # subject_name for matching with timetable.
+                        # Student Excel contains subject code.
                         #
-                        # Therefore:
-                        #   subject_code = Excel Subject Code
-                        #   subject_name = same Subject Code
-                        #
-                        # This keeps existing allotment logic unchanged.
+                        # Keep subject_name = subject_code here because
+                        # existing student-side Arrear logic may use it.
+                        # The actual Hall Allotment matching is now done
+                        # using subject_code.
                         # ------------------------------------------------
 
                         cur.execute(
@@ -13642,7 +13658,7 @@ def arrear_hall_allotment():
                         count += 1
 
                     # ------------------------------------------------
-                    # Commit upload
+                    # Commit student upload
                     # ------------------------------------------------
 
                     db.commit()
@@ -13664,19 +13680,23 @@ def arrear_hall_allotment():
                             "Course, Batch and at least one date column."
                         )
 
+                    # First two columns
                     course_col = df.columns[0]
                     batch_col = df.columns[1]
 
+                    # ------------------------------------------------
                     # Clear old timetable
+                    # ------------------------------------------------
+
                     cur.execute(
                         "DELETE FROM arrear_timetable"
                     )
 
                     count = 0
 
-                    # ------------------------------------------------
-                    # Each date column
-                    # ------------------------------------------------
+                    # =================================================
+                    # DATE COLUMNS
+                    # =================================================
 
                     for date_col in df.columns[2:]:
 
@@ -13687,9 +13707,9 @@ def arrear_hall_allotment():
                         if not exam_date:
                             continue
 
-                        # --------------------------------------------
-                        # Each student/course row
-                        # --------------------------------------------
+                        # ---------------------------------------------
+                        # Each course/batch row
+                        # ---------------------------------------------
 
                         for _, row in df.iterrows():
 
@@ -13708,20 +13728,34 @@ def arrear_hall_allotment():
                             if (
                                 not course
                                 or course.casefold() == "nan"
+
                                 or not batch
                                 or batch.casefold() == "nan"
+
                                 or not subject_text
                                 or subject_text.casefold() == "nan"
                             ):
                                 continue
 
-                            # ----------------------------------------
-                            # Split Subject Code + Subject Name
-                            # ----------------------------------------
+                            # -----------------------------------------
+                            # Example:
+                            #
+                            # 98B - CORE:COMPUTER APPLICATION
+                            #
+                            # code = 98B
+                            # name = CORE:COMPUTER APPLICATION
+                            # -----------------------------------------
 
                             code, name = _arrear_subject_parts(
                                 subject_text
                             )
+
+                            # ------------------------------------------------
+                            # IMPORTANT FIX
+                            #
+                            # arrear_timetable.subject_code is mandatory.
+                            # So insert code into subject_code.
+                            # ------------------------------------------------
 
                             cur.execute(
                                 """
@@ -13730,11 +13764,13 @@ def arrear_hall_allotment():
                                     course,
                                     batch,
                                     exam_date,
+                                    subject_code,
                                     subject_name,
                                     subject_text
                                 )
                                 VALUES
                                 (
+                                    %s,
                                     %s,
                                     %s,
                                     %s,
@@ -13746,6 +13782,7 @@ def arrear_hall_allotment():
                                     course,
                                     batch,
                                     exam_date,
+                                    code,
                                     name,
                                     subject_text
                                 )
@@ -13768,7 +13805,10 @@ def arrear_hall_allotment():
         # PAGE DATA
         # ============================================================
 
+        # ------------------------------------------------------------
         # Student count
+        # ------------------------------------------------------------
+
         cur.execute(
             """
             SELECT COUNT(*) AS total
@@ -13778,7 +13818,10 @@ def arrear_hall_allotment():
 
         student_count = cur.fetchone()["total"]
 
+        # ------------------------------------------------------------
         # Timetable count
+        # ------------------------------------------------------------
+
         cur.execute(
             """
             SELECT COUNT(*) AS total
@@ -13788,7 +13831,10 @@ def arrear_hall_allotment():
 
         timetable_count = cur.fetchone()["total"]
 
+        # ------------------------------------------------------------
         # Exam dates
+        # ------------------------------------------------------------
+
         cur.execute(
             """
             SELECT DISTINCT exam_date
@@ -13799,7 +13845,10 @@ def arrear_hall_allotment():
 
         exam_dates = cur.fetchall()
 
+        # ------------------------------------------------------------
         # Halls
+        # ------------------------------------------------------------
+
         cur.execute(
             """
             SELECT
@@ -13814,7 +13863,10 @@ def arrear_hall_allotment():
 
         halls = cur.fetchall()
 
+        # ------------------------------------------------------------
         # Faculty
+        # ------------------------------------------------------------
+
         cur.execute(
             """
             SELECT
@@ -13855,7 +13907,6 @@ def arrear_hall_allotment():
     except Exception as e:
 
         if db:
-
             try:
                 db.rollback()
             except Exception:
