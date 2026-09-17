@@ -13,6 +13,7 @@ import pandas as pd
 import re
 import os
 import traceback
+import time
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -6547,6 +6548,9 @@ def _normalize_year_value(value):
 @app.route("/generate-hall-allotment", methods=["POST"])
 def generate_hall_allotment():
 
+    start_time = time.time()
+    print("=== HALL ALLOTMENT STARTED ===", flush=True)
+
     db = None
     cursor = None
 
@@ -7275,6 +7279,12 @@ def generate_hall_allotment():
 
         all_students = cursor.fetchall()
 
+        print(
+            f"STUDENTS FETCHED: {len(all_students)} | "
+            f"TIME: {time.time() - start_time:.2f}s",
+            flush=True
+        )
+
         # --------------------------------------------------------
         # Build selected normalized Course/Year keys
         # --------------------------------------------------------
@@ -7866,6 +7876,11 @@ def generate_hall_allotment():
 
         for hall_index, hall in enumerate(halls):
 
+            print(
+                f"PROCESSING HALL {hall_index + 1}/{len(halls)} | "
+                f"TIME: {time.time() - start_time:.2f}s",
+                flush=True
+            )
 
             # ----------------------------------------------------
             # Remaining students
@@ -9038,6 +9053,12 @@ def generate_hall_allotment():
 
         # COMMIT
         # ========================================================
+
+        print(
+            f"ALLOCATION COMPLETE | TOTAL: {total_allocated} | "
+            f"TIME: {time.time() - start_time:.2f}s",
+            flush=True
+        )
 
         db.commit()
 
