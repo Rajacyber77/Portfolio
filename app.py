@@ -13045,8 +13045,10 @@ def arrear_hall_allotment():
         return redirect(url_for("admin_login"))
 
     ensure_arrear_tables()
+
     db = None
     cur = None
+
     message = request.args.get("success")
     error = request.args.get("error")
 
@@ -13054,265 +13056,833 @@ def arrear_hall_allotment():
         db = get_db_connection()
         cur = db.cursor(dictionary=True, buffered=True)
 
+        # ============================================================
+        # POST ACTIONS
+        # ============================================================
         if request.method == "POST":
+
             action = str(request.form.get("action") or "").strip()
             upload = request.files.get("file")
 
+            # ========================================================
+            # ARREAR HALL ALLOTMENT GENERATION
+            # ========================================================
             if action == "generate":
-                exam_date_text = str(request.form.get("exam_date") or "").strip()
-                hall_ids = list(dict.fromkeys(int(x) for x in request.form.getlist("hall_ids") if str(x).strip().isdigit()))
-                # Faculty is selected separately for every selected Arrear hall.
+
+                exam_date_text = str(
+                    request.form.get("exam_date") or ""
+                ).strip()
+
+                hall_ids = list(
+                    dict.fromkeys(
+                        int(x)
+                        for x in request.form.getlist("hall_ids")
+                        if str(x).strip().isdigit()
+                    )
+                )
+
+                # ----------------------------------------------------
+                # Faculty selected separately for each Arrear hall
+                # ----------------------------------------------------
                 faculty_by_hall = {}
+
                 for hid in hall_ids:
-                    raw_fid = str(request.form.get(f"faculty_id_{hid}") or "").strip()
+
+                    raw_fid = str(
+                        request.form.get(f"faculty_id_{hid}") or ""
+                    ).strip()
+
                     if not raw_fid.isdigit():
-                        raise ValueError(f"Please choose a faculty for hall ID {hid}.")
+                        raise ValueError(
+                            f"Please choose a faculty for hall ID {hid}."
+                        )
+
                     faculty_by_hall[hid] = int(raw_fid)
-                if not exam_date_text or exam_date_text == "Select Exam Date":
+
+                # ----------------------------------------------------
+                # Validate Exam Date
+                # ----------------------------------------------------
+                if (
+                    not exam_date_text
+                    or exam_date_text == "Select Exam Date"
+                ):
                     raise ValueError("Please select an Exam Date.")
+
+                # ----------------------------------------------------
+                # Validate halls
+                # ----------------------------------------------------
                 if not hall_ids:
-                    raise ValueError("Please select at least one hall.")
-                exam_date = _arrear_parse_date_header(exam_date_text)
+                    raise ValueError(
+                        "Please select at least one hall."
+                    )
+
+                exam_date = _arrear_parse_date_header(
+                    exam_date_text
+                )
+
                 if not exam_date:
                     raise ValueError("Invalid exam date.")
 
-                cur.execute("""
-                    SELECT s.id, s.department, s.course, s.reg_no, s.student_name,
-                           s.subject_name, s.batch, t.subject_name, t.subject_text
+                # ====================================================
+                # FETCH ARREAR STUDENTS FOR SELECTED EXAM DATE
+                # ====================================================
+                cur.execute(
+                    """
+                    SELECT
+                        s.id,
+                        s.department,
+                        s.course,
+                        s.reg_no,
+                        s.student_name,
+                        s.subject_name,
+                        s.batch,
+                        t.subject_name,
+                        t.subject_text
                     FROM arrear_students s
+
                     INNER JOIN (
-                        SELECT course, batch, exam_date,
-                               MAX(subject_name) AS subject_name,
-                               MAX(subject_text) AS subject_text
+                        SELECT
+                            course,
+                            batch,
+                            exam_date,
+                            MAX(subject_name) AS subject_name,
+                            MAX(subject_text) AS subject_text
                         FROM arrear_timetable
                         WHERE exam_date = %s
-                        GROUP BY course, batch, exam_date, subject_name
+                        GROUP BY
+                            course,
+                            batch,
+                            exam_date,
+                            subject_name
                     ) t
-                      ON LOWER(TRIM(s.course)) = LOWER(TRIM(t.course))
-                     AND LOWER(TRIM(s.batch)) = LOWER(TRIM(t.batch))
-                     AND LOWER(TRIM(s.subject_name)) = LOWER(TRIM(t.subject_name))
-                    ORDER BY s.course, s.batch, s.reg_no
-                """, (exam_date,))
+
+                        ON LOWER(TRIM(s.course))
+                           = LOWER(TRIM(t.course))
+
+                       AND LOWER(TRIM(s.batch))
+                           = LOWER(TRIM(t.batch))
+
+                       AND LOWER(TRIM(s.subject_name))
+                           = LOWER(TRIM(t.subject_name))
+
+                    ORDER BY
+                        s.course,
+                        s.batch,
+                        s.reg_no
+                    """,
+                    (exam_date,)
+                )
+
                 arrear_rows = cur.fetchall()
+
                 if not arrear_rows:
-                    raise ValueError("No Arrear students found for the selected Exam Date.")
+                    raise ValueError(
+                        "No Arrear students found for the selected Exam Date."
+                    )
 
-                placeholders = ",".join(["%s"] * len(hall_ids))
-                cur.execute(f"SELECT id, hall_name, seating_capacity FROM halls WHERE id IN ({placeholders}) ORDER BY hall_name", tuple(hall_ids))
-                selected_halls = cur.fetchall()
-                if len(selected_halls) != len(hall_ids):
-                    raise ValueError("One or more selected halls were not found.")
+                # ====================================================
+                # FETCH SELECTED HALLS
+                # ====================================================
+                placeholders = ",".join(
+                    ["%s"] * len(hall_ids)
+                )
 
-                # Validate selected faculties and keep one unique faculty per Arrear hall.
-                faculty_placeholders = ",".join(["%s"] * len(faculty_by_hall))
                 cur.execute(
-                    f"SELECT id, faculty_code, faculty_name FROM faculty_details WHERE id IN ({faculty_placeholders})",
+                    f"""
+                    SELECT
+                        id,
+                        hall_name,
+                        seating_capacity
+                    FROM halls
+                    WHERE id IN ({placeholders})
+                    ORDER BY hall_name
+                    """,
+                    tuple(hall_ids)
+                )
+
+                selected_halls = cur.fetchall()
+
+                if len(selected_halls) != len(hall_ids):
+                    raise ValueError(
+                        "One or more selected halls were not found."
+                    )
+
+                # ====================================================
+                # VALIDATE FACULTY
+                # ====================================================
+                faculty_placeholders = ",".join(
+                    ["%s"] * len(faculty_by_hall)
+                )
+
+                cur.execute(
+                    f"""
+                    SELECT
+                        id,
+                        faculty_code,
+                        faculty_name
+                    FROM faculty_details
+                    WHERE id IN ({faculty_placeholders})
+                    """,
                     tuple(faculty_by_hall.values())
                 )
+
                 faculty_rows = cur.fetchall()
-                faculty_map = {int(f["id"]): f for f in faculty_rows}
+
+                faculty_map = {
+                    int(f["id"]): f
+                    for f in faculty_rows
+                }
+
                 if len(faculty_map) != len(faculty_by_hall):
-                    raise ValueError("One or more selected faculty members were not found.")
-                if len(set(faculty_by_hall.values())) != len(faculty_by_hall):
-                    raise ValueError("The same faculty cannot be assigned to more than one selected Arrear hall.")
+                    raise ValueError(
+                        "One or more selected faculty members were not found."
+                    )
 
-                # IMPORTANT:
-                # Arrear faculty is independent from Regular faculty.
-                # A hall may already have a Regular faculty, but the Arrear
-                # Hall Allotment must accept the faculty selected on this page.
-                # Do NOT reject the generation just because the hall already
-                # has a Regular faculty.
+                # Same faculty cannot be assigned to multiple halls
+                if (
+                    len(set(faculty_by_hall.values()))
+                    != len(faculty_by_hall)
+                ):
+                    raise ValueError(
+                        "The same faculty cannot be assigned "
+                        "to more than one selected Arrear hall."
+                    )
 
-                # ------------------------------------------------------------
-                # ARREAR IS THE FIRST OCCUPANT OF THE SHARED HALL
-                # ------------------------------------------------------------
-                # If an old Regular generation exists in the selected hall(s)
-                # for the same exam date, it is stale for this regeneration.
-                # Remove only those Regular allotment rows now.  The Regular
-                # Hall Allotment page will regenerate the selected halls later
-                # and automatically reserve the Arrear seats.
+                # ====================================================
+                # ARREAR IS FIRST OCCUPANT OF SHARED HALL
+                # ====================================================
                 #
-                # Example: AF1 capacity 34 + Arrear 10
-                #   Arrear generation -> 10 seats reserved
-                #   Regular generation -> only remaining 24 seats
+                # If Regular allotment already exists for the same
+                # exam date and selected hall, remove only those
+                # Regular rows.
                 #
-                # Do NOT delete Arrear rows here until after this point.
-                regular_cleanup_placeholders = ",".join(["%s"] * len(hall_ids))
+                # Arrear students will occupy the first physical seats.
+                #
+                # Example:
+                #
+                # Hall capacity = 34
+                # Arrear students = 10
+                #
+                # Arrear -> seats 1 to 10
+                # Regular -> remaining 24 seats
+                #
+                # ====================================================
+
+                regular_cleanup_placeholders = ",".join(
+                    ["%s"] * len(hall_ids)
+                )
+
                 cur.execute(
                     f"""
                     DELETE a
                     FROM allotments a
-                    INNER JOIN exam_timetable e ON e.id = a.exam_id
+                    INNER JOIN exam_timetable e
+                        ON e.id = a.exam_id
+
                     WHERE e.exam_date = %s
                       AND e.course = 'HALL ALLOTMENT'
                       AND e.year = 'ALL'
-                      AND a.hall_id IN ({regular_cleanup_placeholders})
+                      AND a.hall_id IN
+                          ({regular_cleanup_placeholders})
                     """,
                     (exam_date, *hall_ids)
                 )
 
-                # Clear only the previous Arrear generation for the selected halls/date.
+                # ====================================================
+                # DELETE PREVIOUS ARREAR GENERATION
+                # ====================================================
+
                 cur.execute(
-                    f"DELETE FROM arrear_allotments WHERE exam_date=%s AND hall_id IN ({placeholders})",
+                    f"""
+                    DELETE FROM arrear_allotments
+                    WHERE exam_date = %s
+                      AND hall_id IN ({placeholders})
+                    """,
                     (exam_date, *hall_ids)
                 )
 
-                # Arrear is generated first, so every selected physical seat is
-                # initially available.  Regular capacity is reduced later by the
-                # Arrear occupancy query in the Regular Hall Allotment route.
+                # ====================================================
+                # INITIAL HALL CAPACITY
+                # ====================================================
+
                 capacity_left = {
-                    hall["id"]: max(0, int(hall["seating_capacity"] or 0))
+                    hall["id"]: max(
+                        0,
+                        int(hall["seating_capacity"] or 0)
+                    )
                     for hall in selected_halls
                 }
 
-                total_available = sum(capacity_left.values())
+                total_available = sum(
+                    capacity_left.values()
+                )
+
                 if total_available < len(arrear_rows):
-                    raise ValueError(f"Not enough seats in selected halls. Arrear students: {len(arrear_rows)}, available seats: {total_available}.")
+                    raise ValueError(
+                        f"Not enough seats in selected halls. "
+                        f"Arrear students: {len(arrear_rows)}, "
+                        f"available seats: {total_available}."
+                    )
+
+                # ====================================================
+                # ALLOT STUDENTS
+                # ====================================================
 
                 hall_index = 0
                 seat_no = 1
+
                 for student in arrear_rows:
-                    while hall_index < len(selected_halls) and capacity_left[selected_halls[hall_index]["id"]] <= 0:
+
+                    # Move to next hall when current hall is full
+                    while (
+                        hall_index < len(selected_halls)
+                        and capacity_left[
+                            selected_halls[hall_index]["id"]
+                        ] <= 0
+                    ):
                         hall_index += 1
                         seat_no = 1
-                    if hall_index >= len(selected_halls):
-                        raise ValueError("Selected hall capacity is insufficient.")
-                    hall_id = selected_halls[hall_index]["id"]
 
-                    # ARREAR FIRST:
-                    # Arrear students always occupy the first physical seats
-                    # in the hall: 1, 2, 3, ... N.
-                    # Regular students are handled by the existing Regular
-                    # Hall Allotment logic and are not changed here.
-                    cur.execute("""
+                    if hall_index >= len(selected_halls):
+                        raise ValueError(
+                            "Selected hall capacity is insufficient."
+                        )
+
+                    hall_id = selected_halls[
+                        hall_index
+                    ]["id"]
+
+                    # ------------------------------------------------
+                    # ARREAR FIRST
+                    #
+                    # Arrear students occupy physical seats:
+                    # 1, 2, 3, ... N
+                    # ------------------------------------------------
+
+                    cur.execute(
+                        """
                         INSERT INTO arrear_allotments
-                        (student_id,hall_id,exam_date,seat_number,row_no,column_no,side,faculty_id)
-                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-                    """, (
-                        student["id"], hall_id, exam_date, seat_no,
-                        None, None, "CENTER", faculty_by_hall[hall_id]
-                    ))
+                        (
+                            student_id,
+                            hall_id,
+                            exam_date,
+                            seat_number,
+                            row_no,
+                            column_no,
+                            side,
+                            faculty_id
+                        )
+                        VALUES
+                        (
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s
+                        )
+                        """,
+                        (
+                            student["id"],
+                            hall_id,
+                            exam_date,
+                            seat_no,
+                            None,
+                            None,
+                            "CENTER",
+                            faculty_by_hall[hall_id]
+                        )
+                    )
+
                     capacity_left[hall_id] -= 1
                     seat_no += 1
 
-                db.commit()
-                message = f"Arrear Hall Allotment generated successfully. {len(arrear_rows)} unique students allotted to {len(selected_halls)} hall(s)."
+                # ====================================================
+                # COMMIT ARREAR ALLOTMENT
+                # ====================================================
 
-            elif action in {"upload_student", "upload_timetable"}:
+                db.commit()
+
+                message = (
+                    "Arrear Hall Allotment generated successfully. "
+                    f"{len(arrear_rows)} unique students allotted to "
+                    f"{len(selected_halls)} hall(s)."
+                )
+
+            # ========================================================
+            # ARREAR STUDENT / TIMETABLE UPLOAD
+            # ========================================================
+            elif action in {
+                "upload_student",
+                "upload_timetable"
+            }:
+
                 if not upload or not upload.filename:
-                    raise ValueError("Please select an Excel file.")
-                if not upload.filename.lower().endswith((".xlsx", ".xls")):
-                    raise ValueError("Please upload an Excel file (.xlsx or .xls).")
+                    raise ValueError(
+                        "Please select an Excel file."
+                    )
+
+                if not upload.filename.lower().endswith(
+                    (".xlsx", ".xls")
+                ):
+                    raise ValueError(
+                        "Please upload an Excel file (.xlsx or .xls)."
+                    )
+
+                # ----------------------------------------------------
+                # Read Excel
+                # ----------------------------------------------------
 
                 df = pd.read_excel(upload)
-                df.columns = [str(c).strip() for c in df.columns]
+
+                df.columns = [
+                    str(c).strip()
+                    for c in df.columns
+                ]
+
+                # ====================================================
+                # ARREAR STUDENT DATABASE UPLOAD
+                # ====================================================
 
                 if action == "upload_student":
+
                     aliases = {
-                        "department": ["DEPARTMENT", "DEPT"],
-                        "course": ["COURSE"],
-                        "reg_no": ["REG NO", "REGNO", "REGISTER NUMBER", "REGISTER NO"],
-                        "student_name": ["STUDENT NAME", "NAME"],
-                        "subject_name": ["SUBJECT CODE", "SUB CODE", "SUBJECT CODE+SUBJECT"],
-                        "batch": ["BATCH"],
+                        "department": [
+                            "DEPARTMENT",
+                            "DEPT"
+                        ],
+
+                        "course": [
+                            "COURSE"
+                        ],
+
+                        "reg_no": [
+                            "REG NO",
+                            "REGNO",
+                            "REGISTER NUMBER",
+                            "REGISTER NO"
+                        ],
+
+                        "student_name": [
+                            "STUDENT NAME",
+                            "NAME"
+                        ],
+
+                        # IMPORTANT:
+                        # Subject code from Excel goes into
+                        # subject_code column.
+                        "subject_code": [
+                            "SUBJECT CODE",
+                            "SUB CODE",
+                            "SUBJECT CODE+SUBJECT"
+                        ],
+
+                        "batch": [
+                            "BATCH"
+                        ],
                     }
+
+                    # ------------------------------------------------
+                    # Find Excel column
+                    # ------------------------------------------------
+
                     def find_col(options):
-                        normalized = {_arrear_norm(c).replace(" ", ""): c for c in df.columns}
+
+                        normalized = {
+                            _arrear_norm(c).replace(" ", ""): c
+                            for c in df.columns
+                        }
+
                         for opt in options:
-                            key = _arrear_norm(opt).replace(" ", "")
+
+                            key = (
+                                _arrear_norm(opt)
+                                .replace(" ", "")
+                            )
+
                             if key in normalized:
                                 return normalized[key]
-                        return None
-                    cols = {k: find_col(v) for k, v in aliases.items()}
-                    missing = [k for k,v in cols.items() if not v]
-                    if missing:
-                        raise ValueError("Arrear DB missing columns: " + ", ".join(missing))
 
-                    cur.execute("DELETE FROM arrear_students")
+                        return None
+
+                    cols = {
+                        k: find_col(v)
+                        for k, v in aliases.items()
+                    }
+
+                    # ------------------------------------------------
+                    # Check missing columns
+                    # ------------------------------------------------
+
+                    missing = [
+                        k
+                        for k, v in cols.items()
+                        if not v
+                    ]
+
+                    if missing:
+                        raise ValueError(
+                            "Arrear DB missing columns: "
+                            + ", ".join(missing)
+                        )
+
+                    # ------------------------------------------------
+                    # Clear old student database
+                    # ------------------------------------------------
+
+                    cur.execute(
+                        "DELETE FROM arrear_students"
+                    )
+
                     count = 0
+
+                    # =================================================
+                    # INSERT STUDENTS
+                    # =================================================
+
                     for _, row in df.iterrows():
-                        vals = [str(row[cols[k]]).strip() for k in cols]
-                        if any(v == "" or v.casefold() == "nan" for v in vals):
+
+                        department = str(
+                            row[cols["department"]]
+                        ).strip()
+
+                        course = str(
+                            row[cols["course"]]
+                        ).strip()
+
+                        reg_no = str(
+                            row[cols["reg_no"]]
+                        ).strip()
+
+                        student_name = str(
+                            row[cols["student_name"]]
+                        ).strip()
+
+                        subject_code = str(
+                            row[cols["subject_code"]]
+                        ).strip()
+
+                        batch = str(
+                            row[cols["batch"]]
+                        ).strip()
+
+                        # ------------------------------------------------
+                        # Skip incomplete rows
+                        # ------------------------------------------------
+
+                        if (
+                            not department
+                            or department.casefold() == "nan"
+                            or not course
+                            or course.casefold() == "nan"
+                            or not reg_no
+                            or reg_no.casefold() == "nan"
+                            or not student_name
+                            or student_name.casefold() == "nan"
+                            or not subject_code
+                            or subject_code.casefold() == "nan"
+                            or not batch
+                            or batch.casefold() == "nan"
+                        ):
                             continue
-                        cur.execute("""
+
+                        # ------------------------------------------------
+                        # IMPORTANT FIX
+                        #
+                        # Database has both:
+                        #   subject_code
+                        #   subject_name
+                        #
+                        # Existing Arrear Hall Allotment logic uses
+                        # subject_name for matching with timetable.
+                        #
+                        # Therefore:
+                        #   subject_code = Excel Subject Code
+                        #   subject_name = same Subject Code
+                        #
+                        # This keeps existing allotment logic unchanged.
+                        # ------------------------------------------------
+
+                        cur.execute(
+                            """
                             INSERT INTO arrear_students
-                            (department, course, reg_no, student_name, subject_name, batch)
-                            VALUES (%s,%s,%s,%s,%s,%s)
-                        """, tuple(vals))
+                            (
+                                department,
+                                course,
+                                reg_no,
+                                student_name,
+                                subject_code,
+                                subject_name,
+                                batch
+                            )
+                            VALUES
+                            (
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s
+                            )
+                            """,
+                            (
+                                department,
+                                course,
+                                reg_no,
+                                student_name,
+                                subject_code,
+                                subject_code,
+                                batch
+                            )
+                        )
+
                         count += 1
+
+                    # ------------------------------------------------
+                    # Commit upload
+                    # ------------------------------------------------
+
                     db.commit()
-                    message = f"Arrear Student DB uploaded successfully. {count} records loaded."
+
+                    message = (
+                        "Arrear Student DB uploaded successfully. "
+                        f"{count} records loaded."
+                    )
+
+                # ====================================================
+                # ARREAR TIMETABLE UPLOAD
+                # ====================================================
 
                 else:
+
                     if len(df.columns) < 3:
-                        raise ValueError("Arrear Time Table must contain Course, Batch and at least one date column.")
+                        raise ValueError(
+                            "Arrear Time Table must contain "
+                            "Course, Batch and at least one date column."
+                        )
+
                     course_col = df.columns[0]
                     batch_col = df.columns[1]
-                    cur.execute("DELETE FROM arrear_timetable")
+
+                    # Clear old timetable
+                    cur.execute(
+                        "DELETE FROM arrear_timetable"
+                    )
+
                     count = 0
+
+                    # ------------------------------------------------
+                    # Each date column
+                    # ------------------------------------------------
+
                     for date_col in df.columns[2:]:
-                        exam_date = _arrear_parse_date_header(date_col)
+
+                        exam_date = _arrear_parse_date_header(
+                            date_col
+                        )
+
                         if not exam_date:
                             continue
-                        for _, row in df.iterrows():
-                            course = str(row[course_col]).strip()
-                            batch = str(row[batch_col]).strip()
-                            subject_text = str(row[date_col]).strip()
-                            if (not course or course.casefold() == "nan" or not batch or batch.casefold() == "nan"
-                                    or not subject_text or subject_text.casefold() == "nan"):
-                                continue
-                            code, name = _arrear_subject_parts(subject_text)
-                            cur.execute("""
-                                INSERT INTO arrear_timetable
-                                (course,batch,exam_date,subject_name,subject_text)
-                                VALUES (%s,%s,%s,%s,%s)
-                            """, (course,batch,exam_date,name,subject_text))
-                            count += 1
-                    db.commit()
-                    message = f"Arrear Time Table uploaded successfully. {count} exam entries loaded."
 
-        cur.execute("SELECT COUNT(*) AS total FROM arrear_students")
+                        # --------------------------------------------
+                        # Each student/course row
+                        # --------------------------------------------
+
+                        for _, row in df.iterrows():
+
+                            course = str(
+                                row[course_col]
+                            ).strip()
+
+                            batch = str(
+                                row[batch_col]
+                            ).strip()
+
+                            subject_text = str(
+                                row[date_col]
+                            ).strip()
+
+                            if (
+                                not course
+                                or course.casefold() == "nan"
+                                or not batch
+                                or batch.casefold() == "nan"
+                                or not subject_text
+                                or subject_text.casefold() == "nan"
+                            ):
+                                continue
+
+                            # ----------------------------------------
+                            # Split Subject Code + Subject Name
+                            # ----------------------------------------
+
+                            code, name = _arrear_subject_parts(
+                                subject_text
+                            )
+
+                            cur.execute(
+                                """
+                                INSERT INTO arrear_timetable
+                                (
+                                    course,
+                                    batch,
+                                    exam_date,
+                                    subject_name,
+                                    subject_text
+                                )
+                                VALUES
+                                (
+                                    %s,
+                                    %s,
+                                    %s,
+                                    %s,
+                                    %s
+                                )
+                                """,
+                                (
+                                    course,
+                                    batch,
+                                    exam_date,
+                                    name,
+                                    subject_text
+                                )
+                            )
+
+                            count += 1
+
+                    # ------------------------------------------------
+                    # Commit timetable upload
+                    # ------------------------------------------------
+
+                    db.commit()
+
+                    message = (
+                        "Arrear Time Table uploaded successfully. "
+                        f"{count} exam entries loaded."
+                    )
+
+        # ============================================================
+        # PAGE DATA
+        # ============================================================
+
+        # Student count
+        cur.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM arrear_students
+            """
+        )
+
         student_count = cur.fetchone()["total"]
-        cur.execute("SELECT COUNT(*) AS total FROM arrear_timetable")
+
+        # Timetable count
+        cur.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM arrear_timetable
+            """
+        )
+
         timetable_count = cur.fetchone()["total"]
-        cur.execute("SELECT DISTINCT exam_date FROM arrear_timetable ORDER BY exam_date")
+
+        # Exam dates
+        cur.execute(
+            """
+            SELECT DISTINCT exam_date
+            FROM arrear_timetable
+            ORDER BY exam_date
+            """
+        )
+
         exam_dates = cur.fetchall()
-        cur.execute("""
-            SELECT id, hall_name, seating_capacity, floor
+
+        # Halls
+        cur.execute(
+            """
+            SELECT
+                id,
+                hall_name,
+                seating_capacity,
+                floor
             FROM halls
             ORDER BY hall_name
-        """)
+            """
+        )
+
         halls = cur.fetchall()
-        cur.execute("""
-            SELECT id, faculty_code, faculty_name, department, course, year
+
+        # Faculty
+        cur.execute(
+            """
+            SELECT
+                id,
+                faculty_code,
+                faculty_name,
+                department,
+                course,
+                year
             FROM faculty_details
-            ORDER BY faculty_name, faculty_code
-        """)
+            ORDER BY
+                faculty_name,
+                faculty_code
+            """
+        )
+
         faculties = cur.fetchall()
+
+        # ============================================================
+        # RENDER PAGE
+        # ============================================================
 
         return render_template(
             "arrear_hall_allotment.html",
-            message=message, error=error,
-            student_count=student_count, timetable_count=timetable_count,
-            exam_dates=exam_dates, halls=halls, faculties=faculties
+            message=message,
+            error=error,
+            student_count=student_count,
+            timetable_count=timetable_count,
+            exam_dates=exam_dates,
+            halls=halls,
+            faculties=faculties
         )
+
+    # ================================================================
+    # ERROR HANDLING
+    # ================================================================
+
     except Exception as e:
+
         if db:
+
             try:
                 db.rollback()
             except Exception:
                 pass
+
         return render_template(
             "arrear_hall_allotment.html",
-            message=message, error=str(e),
-            student_count=0, timetable_count=0, exam_dates=[], halls=[], faculties=[]
+            message=message,
+            error=str(e),
+            student_count=0,
+            timetable_count=0,
+            exam_dates=[],
+            halls=[],
+            faculties=[]
         )
+
+    # ================================================================
+    # CLOSE DATABASE
+    # ================================================================
+
     finally:
+
         if cur:
             cur.close()
+
         if db:
             db.close()
-
 # ==================================================
 # DELETE TOTAL ARREAR HALL ALLOTMENT
 # ==================================================
