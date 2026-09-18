@@ -79,7 +79,7 @@ ADMIN_ROUTES = {
     "/generate-hall-allotment", "/admin-timetable-upload",
     "/admin-attendance", "/admin-attendance-pdf",
     "/admin-attendance-close-all",
-    "/admin-dashboard", "/test-db", "/change-admin-password",
+    "/admin-dashboard", "/admin-question-management", "/test-db", "/change-admin-password",
     "/arrear-hall-allotment",
     "/delete-arrear-timetable", "/delete-arrear-student-database",
     "/delete-total-arrear-hall-allotment", "/arrear-hall-allotment-pdf",
@@ -2265,6 +2265,7 @@ def student_upload():
             excel_file = pd.ExcelFile(file)
 
             db = get_db_connection()
+
             cursor = db.cursor()
 
             total_students = 0
@@ -2283,16 +2284,17 @@ def student_upload():
                     header=None
                 )
 
-                header_row = None
-
                 # --------------------------------------
                 # FIND HEADER ROW
-                # Search entire sheet
                 # --------------------------------------
 
-                for i in range(len(df)):
+                header_row = None
 
-                    values = df.to_numpy()[i]
+                # Convert once instead of calling
+                # df.to_numpy() for every row
+                sheet_values = df.to_numpy()
+
+                for i, values in enumerate(sheet_values):
 
                     row_values = [
                         str(value).strip().upper()
@@ -2343,14 +2345,15 @@ def student_upload():
 
                     raise ValueError(
                         f"Invalid Excel format in sheet '{sheet_name}'. "
-                        "Required columns: S.NO, REG NO, STUDENT NAME, DEPARTMENT, COURSE, YEAR."
+                        "Required columns: S.NO, REG NO, STUDENT NAME, "
+                        "DEPARTMENT, COURSE, YEAR."
                     )
 
                 # --------------------------------------
                 # GET HEADER VALUES
                 # --------------------------------------
 
-                header_values = df.to_numpy()[header_row]
+                header_values = sheet_values[header_row]
 
                 new_columns = [
                     str(value)
@@ -2454,7 +2457,8 @@ def student_upload():
 
                     raise ValueError(
                         f"Invalid Excel format in sheet '{sheet_name}'. "
-                        "Required columns: REG NO, STUDENT NAME, DEPARTMENT, COURSE, YEAR."
+                        "Required columns: REG NO, STUDENT NAME, "
+                        "DEPARTMENT, COURSE, YEAR."
                     )
 
                 # --------------------------------------
@@ -2524,9 +2528,12 @@ def student_upload():
                 # STUDENT DATA
                 # --------------------------------------
 
-                for row_number in range(len(df)):
+                # Convert dataframe once
+                student_values = df.to_numpy()
 
-                    row_data = df.to_numpy()[row_number]
+                for row_number, row_data in enumerate(
+                    student_values
+                ):
 
                     register_number = str(
                         row_data[reg_position]
@@ -2575,35 +2582,70 @@ def student_upload():
                     ):
 
                         raise ValueError(
-                            f"Invalid Excel format/data in sheet '{sheet_name}', "
-                            f"row {row_number + header_row + 2}. "
-                            "REG NO, STUDENT NAME, DEPARTMENT, COURSE and YEAR "
-                            "must contain values."
+                            f"Invalid Excel format/data in sheet "
+                            f"'{sheet_name}', row "
+                            f"{row_number + header_row + 2}. "
+                            "REG NO, STUDENT NAME, DEPARTMENT, "
+                            "COURSE and YEAR must contain values."
                         )
 
                     # ----------------------------------
-                    # YEAR FORMAT
+                    # NORMALIZE YEAR ROBUSTLY
+                    # Supports:
+                    # 1, 1.0, I, I Year,
+                    # 1st Year, etc.
                     # ----------------------------------
 
-                    # ----------------------------------
-                    # NORMALIZE YEAR ROBUSTLY
-                    # Supports Excel values such as 1, 1.0, I, I Year, 1st Year, etc.
-                    # ----------------------------------
                     year_upper = year.upper().strip()
 
                     if year_upper.endswith(".0"):
-                        year_upper = year_upper[:-2].strip()
 
-                    if year_upper in ("I", "1", "1 YEAR", "I YEAR", "1ST", "1ST YEAR"):
+                        year_upper = (
+                            year_upper[:-2].strip()
+                        )
+
+                    if year_upper in (
+                        "I",
+                        "1",
+                        "1 YEAR",
+                        "I YEAR",
+                        "1ST",
+                        "1ST YEAR"
+                    ):
+
                         year = "I Year"
 
-                    elif year_upper in ("II", "2", "2 YEAR", "II YEAR", "2ND", "2ND YEAR"):
+                    elif year_upper in (
+                        "II",
+                        "2",
+                        "2 YEAR",
+                        "II YEAR",
+                        "2ND",
+                        "2ND YEAR"
+                    ):
+
                         year = "II Year"
 
-                    elif year_upper in ("III", "3", "3 YEAR", "III YEAR", "3RD", "3RD YEAR"):
+                    elif year_upper in (
+                        "III",
+                        "3",
+                        "3 YEAR",
+                        "III YEAR",
+                        "3RD",
+                        "3RD YEAR"
+                    ):
+
                         year = "III Year"
 
-                    elif year_upper in ("IV", "4", "4 YEAR", "IV YEAR", "4TH", "4TH YEAR"):
+                    elif year_upper in (
+                        "IV",
+                        "4",
+                        "4 YEAR",
+                        "IV YEAR",
+                        "4TH",
+                        "4TH YEAR"
+                    ):
+
                         year = "IV Year"
 
                     # ----------------------------------
@@ -2628,8 +2670,10 @@ def student_upload():
             # ------------------------------------------
 
             if total_students == 0:
+
                 raise ValueError(
-                    "Invalid Excel file. No valid student records were found."
+                    "Invalid Excel file. "
+                    "No valid student records were found."
                 )
 
             # ------------------------------------------
@@ -2655,9 +2699,13 @@ def student_upload():
         except Exception as e:
 
             if db:
+
                 db.rollback()
 
-            print("UPLOAD ERROR:", str(e))
+            print(
+                "UPLOAD ERROR:",
+                str(e)
+            )
 
             return render_template(
                 "student_upload.html",
@@ -2667,15 +2715,16 @@ def student_upload():
         finally:
 
             if cursor:
+
                 cursor.close()
 
             if db:
+
                 db.close()
 
     return render_template(
         "student_upload.html"
     )
-
 # ==================================================
 # EXTRA STUDENT UPLOAD URL
 # ==================================================
@@ -10659,6 +10708,73 @@ def download_question_paper(filename):
 # QUESTION PAPER MANAGEMENT
 # ==================================================
 
+# ==================================================
+# ADMIN QUESTION PAPER MANAGEMENT
+# ==================================================
+
+@app.route("/admin-question-management")
+def admin_question_management():
+
+    db = None
+    cursor = None
+
+    try:
+
+        db = get_db_connection()
+
+        cursor = db.cursor(
+            dictionary=True
+        )
+
+        # ------------------------------------------
+        # GET ALL QUESTION PAPERS FOR ADMIN
+        # ------------------------------------------
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                department,
+                course,
+                year,
+                subject,
+                subject_name,
+                total_strength,
+                exam_date,
+                file_name,
+                uploaded_at
+            FROM question_papers
+            ORDER BY id DESC
+            """
+        )
+
+        papers = cursor.fetchall()
+
+        return render_template(
+            "admin_question_management.html",
+            papers=papers
+        )
+
+    except Exception as e:
+
+        return (
+            "Error loading question papers: "
+            + str(e)
+        )
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if db:
+            db.close()
+
+
+# ==================================================
+# FACULTY QUESTION PAPER MANAGEMENT
+# ==================================================
+
 @app.route("/question-papers")
 def question_papers():
 
@@ -10757,6 +10873,11 @@ def delete_question_paper(paper_id):
 
         if paper is None:
 
+            if session.get("admin_logged_in"):
+                return redirect(
+                    url_for("admin_question_management")
+                )
+
             return redirect(
                 url_for("question_papers")
             )
@@ -10789,6 +10910,12 @@ def delete_question_paper(paper_id):
         if os.path.exists(file_path):
 
             os.remove(file_path)
+
+        if session.get("admin_logged_in"):
+
+            return redirect(
+                url_for("admin_question_management")
+            )
 
         return redirect(
             url_for("question_papers")
