@@ -8661,7 +8661,9 @@ def generate_hall_allotment():
             # ====================================================
             # 2 STUDENTS PER SEAT
             if seat_mode == "2":
-                # Every physical seat MUST contain exactly 2 students.
+                # Physical seats normally contain 2 students.
+                # If the final remaining student cannot form a valid pair,
+                # that last physical seat may contain 1 LEFT student.
                 #
                 # Pairing rule:
                 #   I Year  + I Year   -> NOT allowed
@@ -8714,10 +8716,18 @@ def generate_hall_allotment():
                     )
 
                     if partner_index is None:
-                        # This student cannot form a valid pair with the
-                        # remaining students in this hall. Do NOT create a
-                        # single seat because 2-student mode requires exactly
-                        # two students per physical seat.
+                        # If this is the FINAL remaining student in this hall,
+                        # allow a single LEFT student in 2-student mode.
+                        # This prevents one last student from being skipped
+                        # when the total student count is odd.
+                        #
+                        # If other students are still available, keep this
+                        # student for the next hall so the existing pairing
+                        # rules are preserved.
+                        if not remaining_for_pairing:
+                            pair_plan.append((s1, g1, None, None))
+                            break
+
                         remaining_for_pairing.insert(0, (s1, g1))
                         break
 
@@ -8726,6 +8736,8 @@ def generate_hall_allotment():
 
                 # Roll back students that could not be placed as a complete
                 # two-student seat. They remain available for the next hall.
+                # The final single student is already part of pair_plan and
+                # therefore is not rolled back.
                 allocated_ids = set()
                 for s1, _g1, s2, _g2 in pair_plan:
                     allocated_ids.add(s1["id"])
@@ -8739,8 +8751,9 @@ def generate_hall_allotment():
                 for group_key, count in rollback_counts.items():
                     positions[group_key] -= count
 
-                # Insert only complete LEFT + RIGHT pairs, contiguously.
-                # No single student and no physical-seat gap is created.
+                # Insert complete LEFT + RIGHT pairs contiguously.
+                # A single LEFT student is allowed only for the final
+                # remaining student in this hall.
                 plan_index = 0
                 for column_no in range(1, COLUMNS + 1):
                     if plan_index >= len(pair_plan):
@@ -8758,10 +8771,13 @@ def generate_hall_allotment():
                         )
                         total_allocated += 1
 
-                        insert_student(
-                            s2, seat_number, row_no, column_no, "RIGHT"
-                        )
-                        total_allocated += 1
+                        # Normal case: two students share the physical seat.
+                        # Final odd student: keep the RIGHT side empty.
+                        if s2 is not None:
+                            insert_student(
+                                s2, seat_number, row_no, column_no, "RIGHT"
+                            )
+                            total_allocated += 1
 
         # REMAINING STUDENTS
         # ========================================================
