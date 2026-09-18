@@ -3817,10 +3817,7 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
                 -- --------------------------------------------------
                 (
                     SELECT
-                        COALESCE(
-                            NULLIF(TRIM(et.subject_name), ''),
-                            NULLIF(TRIM(et.subject), '')
-                        )
+                        NULLIF(TRIM(et.subject), '')
                     FROM exam_timetable et
                     WHERE
                         LOWER(TRIM(et.course))
@@ -4076,13 +4073,19 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
                 str(tt.get("exam_name") or "").strip().lower(),
             )
 
+            # exam_timetable stores:
+            #   subject      = Subject Code
+            #   subject_name = Subject Name
+            # PDF fields need:
+            #   subject      = Subject Name
+            #   subject_name = Subject Code (displayed as Sub.Code)
             subject = str(
                 tt.get("subject_name")
-                or tt.get("subject")
                 or ""
             ).strip()
             subject_name = str(
-                tt.get("subject_name") or ""
+                tt.get("subject")
+                or ""
             ).strip()
 
             if subject or subject_name:
@@ -11394,6 +11397,16 @@ def admin_timetable_upload():
 
                             # ==================================================
                             # INSERT
+                            # ==================================================
+                            #
+                            # exam_timetable mapping:
+                            #   subject      -> Subject Code
+                            #   subject_name -> Subject Name
+                            #
+                            # Example:
+                            #   11T - Tamil - I
+                            #   subject      = 11T
+                            #   subject_name = Tamil - I
                             # ==================================================
 
                             cursor.execute(
