@@ -70,7 +70,7 @@
 
             color: white;
 
-            padding: 20px 8%;
+            padding: 15px 8%;
 
             display: flex;
 
@@ -80,6 +80,36 @@
 
             box-shadow:
                 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+
+        /* =========================================
+           COLLEGE LOGO + HEADER CONTENT
+        ========================================= */
+
+        .college-brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+
+        .college-logo {
+
+            width: 75px;
+
+            height: 75px;
+
+            object-fit: contain;
+
+            background: white;
+
+            border-radius: 50%;
+
+            padding: 3px;
         }
 
 
@@ -294,6 +324,20 @@
             }
 
 
+            .college-brand {
+
+                flex-direction: column;
+            }
+
+
+            .college-logo {
+
+                width: 70px;
+
+                height: 70px;
+            }
+
+
             nav a {
 
                 margin: 8px;
@@ -353,15 +397,28 @@
 
     <header>
 
-        <div>
+        <div class="college-brand">
 
-            <h1>
-                College Examination Cell
-            </h1>
+            <!-- COLLEGE LOGO -->
 
-            <p>
-                Hall Allotment Management System
-            </p>
+            <img
+                src="{{ url_for('static', filename='images/SVCAS-Logo.webp') }}"
+                alt="College Logo"
+                class="college-logo"
+            >
+
+
+            <div>
+
+                <h1>
+                    College Examination Cell
+                </h1>
+
+                <p>
+                    Hall Allotment Management System
+                </p>
+
+            </div>
 
         </div>
 
@@ -445,7 +502,7 @@
     <footer>
 
         <p>
-            POWERD BY DEPARTMENT OF COMPUTER APPLICATIONS
+            DEVELOPED BY DEPARTMENT OF COMPUTER APPLICATIONS
         </p>
 
         <p>
