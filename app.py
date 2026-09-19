@@ -8741,7 +8741,9 @@ def generate_hall_allotment():
                 allocated_ids = set()
                 for s1, _g1, s2, _g2 in pair_plan:
                     allocated_ids.add(s1["id"])
-                    allocated_ids.add(s2["id"])
+                    # Final single student has no RIGHT-side partner.
+                    if s2 is not None:
+                        allocated_ids.add(s2["id"])
 
                 rollback_counts = {}
                 for student, group_key in students_for_hall:
