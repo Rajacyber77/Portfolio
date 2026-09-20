@@ -78,6 +78,7 @@ ADMIN_ROUTES = {
     "/hall-faculty-signature-pdf", "/admin-seating-arrangement-pdf",
     "/generate-hall-allotment", "/admin-timetable-upload",
     "/admin-attendance", "/admin-attendance-pdf",
+    "/admin-attendance-summary-pdf",
     "/admin-attendance-close-all",
     "/admin-dashboard", "/admin-question-management", "/test-db", "/change-admin-password",
     "/arrear-hall-allotment",
@@ -13014,6 +13015,169 @@ def admin_attendance_pdf():
 
         if db:
             db.close()
+
+# ==================================================
+# ADMIN ATTENDANCE SUMMARY PDF
+# COURSE + YEAR + SUBJECT WISE
+# ==================================================
+
+@app.route('/admin-attendance-summary-pdf')
+def admin_attendance_summary_pdf():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
+    ensure_attendance_table()
+    db = None
+    cur = None
+    try:
+        db = get_db_connection()
+        cur = db.cursor(dictionary=True, buffered=True)
+
+        regular_rows = _attendance_rows(
+            cur,
+            """
+            WHERE LOWER(COALESCE(ea.attendance_status, '')) IN ('present', 'absent')
+            """,
+        )
+
+        ensure_arrear_attendance_table()
+        cur.execute("""
+            SELECT aa.id AS allotment_id,
+                   aa.student_id,
+                   aa.hall_id,
+                   aa.faculty_id,
+                   s.course,
+                   s.batch AS year,
+                   s.subject_name AS subject,
+                   aea.attendance_status
+            FROM arrear_allotments aa
+            INNER JOIN arrear_students s ON s.id = aa.student_id
+            INNER JOIN arrear_exam_attendance aea
+                ON aea.arrear_allotment_id = aa.id
+            WHERE LOWER(COALESCE(aea.attendance_status, '')) IN ('present', 'absent')
+            ORDER BY s.course, s.batch, s.subject_name, aa.id
+        """)
+        arrear_rows = cur.fetchall()
+
+        grouped = {}
+        for row in regular_rows + arrear_rows:
+            course = str(row.get('course') or 'Unknown Course').strip()
+            year = str(row.get('year') or 'Unknown Year').strip()
+            subject = str(row.get('subject') or 'Unknown Subject').strip()
+            key = (course.casefold(), year.casefold(), subject.casefold())
+            if key not in grouped:
+                grouped[key] = {
+                    'course': course,
+                    'year': year,
+                    'subject': subject,
+                    'total': 0,
+                    'absent': 0,
+                    'present': 0,
+                }
+            grouped[key]['total'] += 1
+            status = str(row.get('attendance_status') or '').strip().lower()
+            if status == 'absent':
+                grouped[key]['absent'] += 1
+            elif status == 'present':
+                grouped[key]['present'] += 1
+
+        buffer = BytesIO()
+        pdf_title = 'ATTENDANCE SUMMARY REPORT'
+        pdf_filename = 'Attendance_Summary_Report.pdf'
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=landscape(A4),
+            rightMargin=25,
+            leftMargin=25,
+            topMargin=25,
+            bottomMargin=25,
+            title=pdf_title,
+            author='College Examination Cell'
+        )
+
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'AttendanceSummaryTitle', parent=styles['Title'],
+            fontSize=16, leading=20, alignment=1, spaceAfter=8
+        )
+        cell_style = ParagraphStyle(
+            'AttendanceSummaryCell', parent=styles['BodyText'],
+            fontSize=8, leading=10, alignment=1
+        )
+        head_style = ParagraphStyle(
+            'AttendanceSummaryHead', parent=styles['BodyText'],
+            fontSize=8, leading=10, alignment=1
+        )
+
+        story = [
+            Paragraph('COLLEGE EXAMINATION CELL', title_style),
+            Paragraph(pdf_title, title_style),
+            Spacer(1, 10),
+        ]
+        data = [[
+            Paragraph('<b>S.No</b>', head_style),
+            Paragraph('<b>Course</b>', head_style),
+            Paragraph('<b>Year</b>', head_style),
+            Paragraph('<b>Subject</b>', head_style),
+            Paragraph('<b>Total Strength</b>', head_style),
+            Paragraph('<b>Absent Student</b>', head_style),
+            Paragraph('<b>Present Student</b>', head_style),
+            Paragraph('<b>Faculty Signature</b>', head_style),
+        ]]
+
+        items = sorted(
+            grouped.values(),
+            key=lambda x: (x['course'].casefold(), x['year'].casefold(), x['subject'].casefold())
+        )
+        for index, item in enumerate(items, start=1):
+            data.append([
+                Paragraph(str(index), cell_style),
+                Paragraph(item['course'], cell_style),
+                Paragraph(item['year'], cell_style),
+                Paragraph(item['subject'], cell_style),
+                Paragraph(str(item['total']), cell_style),
+                Paragraph(str(item['absent']), cell_style),
+                Paragraph(str(item['present']), cell_style),
+                Paragraph('____________________', cell_style),
+            ])
+
+        table = Table(
+            data,
+            colWidths=[40, 90, 65, 180, 75, 85, 90, 120],
+            repeatRows=1
+        )
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 5),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+            ('TOPPADDING', (0, 0), (-1, -1), 7),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+        ]))
+        story.append(table)
+
+        def set_pdf_metadata(canvas_obj, doc_obj):
+            canvas_obj.setTitle(pdf_title)
+            canvas_obj.setAuthor('College Examination Cell')
+            canvas_obj.setSubject('Course, Year and Subject Wise Attendance Summary')
+
+        doc.build(story, onFirstPage=set_pdf_metadata, onLaterPages=set_pdf_metadata)
+        buffer.seek(0)
+        return send_file(
+            buffer, mimetype='application/pdf', as_attachment=True,
+            download_name=pdf_filename
+        )
+    except Exception as e:
+        traceback.print_exc()
+        return 'Attendance Summary PDF Error: ' + str(e), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+
 
 # ==================================================
 # ARREAR MODULE - DATABASE TABLES

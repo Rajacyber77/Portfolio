@@ -86,6 +86,15 @@ h1{
 }
 
 
+ .summary-btn{
+    background:#2563eb !important;
+}
+
+.summary-btn:hover{
+    background:#1d4ed8 !important;
+}
+
+
 /* ==================================================
    COURSE + YEAR SECTION
    ================================================== */
@@ -379,6 +388,13 @@ td.hall-name{
         href="{{ url_for('admin_attendance_pdf', status='absent') }}"
     >
         📄 Absent Students PDF
+    </a>
+
+    <a
+        class="btn summary-btn"
+        href="{{ url_for('admin_attendance_summary_pdf') }}"
+    >
+        📊 Attendance Summary PDF
     </a>
 
 </div>
