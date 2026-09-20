@@ -12049,7 +12049,7 @@ h1{{color:#b91c1c;margin-bottom:18px;}}
             # Do NOT redirect back to faculty-attendance.
             return render_template(
                 'faculty_attendance_success.html',
-                saved=change
+                saved=changed
             )
         # ==========================================================
         # GET STUDENTS
