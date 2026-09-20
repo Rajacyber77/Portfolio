@@ -13138,7 +13138,7 @@ def admin_attendance_summary_pdf():
                 Paragraph(str(item['total']), cell_style),
                 Paragraph(str(item['absent']), cell_style),
                 Paragraph(str(item['present']), cell_style),
-                Paragraph('____________________', cell_style),
+                Paragraph('', cell_style),
             ])
 
         table = Table(
