@@ -557,6 +557,150 @@ th{
 
 </div>
 
+
+<!-- =====================================================
+     ATTENDANCE SUBMIT - BROWSER HISTORY FIX
+     ===================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.querySelector(
+        'form[method="POST"]'
+    );
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const submitButton =
+                form.querySelector(
+                    'button[type="submit"]'
+                );
+
+
+            /* Disable button while submitting */
+
+            if (submitButton) {
+
+                submitButton.disabled = true;
+
+                submitButton.textContent =
+                    "Submitting...";
+
+            }
+
+
+            try {
+
+                /*
+                 * Submit the existing form normally
+                 * through fetch().
+                 *
+                 * Existing Flask POST logic remains unchanged.
+                 */
+
+                const response = await fetch(
+                    window.location.href,
+                    {
+                        method: "POST",
+
+                        body: new FormData(form),
+
+                        credentials: "same-origin",
+
+                        redirect: "follow",
+
+                        cache: "no-store"
+                    }
+                );
+
+
+                /*
+                 * Check whether Flask request succeeded.
+                 */
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Attendance submission failed."
+                    );
+
+                }
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * location.replace() is used instead of
+                 * normal location.href.
+                 *
+                 * This replaces the current Attendance page
+                 * history entry with Dashboard.
+                 *
+                 * Therefore:
+                 *
+                 * Attendance
+                 *     ↓
+                 * Submit
+                 *     ↓
+                 * Dashboard
+                 *
+                 * Back button will not return to the
+                 * submitted Attendance page.
+                 */
+
+                window.location.replace(
+                    "{{ url_for('faculty_dashboard') }}"
+                );
+
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Attendance submission error:",
+                    error
+                );
+
+
+                /*
+                 * Enable button again if submission fails.
+                 */
+
+                if (submitButton) {
+
+                    submitButton.disabled = false;
+
+                    submitButton.textContent =
+                        "Submit Attendance";
+
+                }
+
+
+                alert(
+                    "Attendance submission failed. Please try again."
+                );
+
+            }
+
+        }
+    );
+
+});
+
+</script>
+
+
 </body>
 
 </html>
