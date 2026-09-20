@@ -12047,13 +12047,10 @@ h1{{color:#b91c1c;margin-bottom:18px;}}
             db.commit()
 
             # Do NOT redirect back to faculty-attendance.
-            return redirect(
-                url_for(
-                    'faculty_attendance_submitted',
-                    saved=changed
-                )
+            return render_template(
+                'faculty_attendance_success.html',
+                saved=change
             )
-
         # ==========================================================
         # GET STUDENTS
         # ==========================================================
