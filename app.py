@@ -3569,6 +3569,7 @@ def _fetch_allotment_groups(cursor):
 def _draw_common_pdf_header(
     pdf,
     title,
+    exam_name=None,
     exam_date=None,
     session_name=None,
     start_time=None,
@@ -3625,7 +3626,7 @@ def _draw_common_pdf_header(
     pdf.drawCentredString(
         page_width / 2,
         page_height - 72,
-        "COLLEGE EXAMINATION CELL",
+        "CONTROLLER OF EXAMINATIONS",
     )
 
     # PDF title.
@@ -3637,6 +3638,12 @@ def _draw_common_pdf_header(
     )
 
     y = page_height - 110
+
+    # Exam name is shown on every common-header PDF.
+    if exam_name:
+        pdf.setFont("Helvetica-Bold", 9)
+        pdf.drawString(35, y, f"Exam Name : {exam_name}")
+        y -= 13
     pdf.setFont("Helvetica", 8.5)
 
     details = []
@@ -3659,6 +3666,7 @@ def _draw_common_pdf_header(
 def _draw_pdf_header(
     pdf,
     title,
+    exam_name=None,
     exam_date=None,
     session_name=None,
     start_time=None,
@@ -3671,6 +3679,7 @@ def _draw_pdf_header(
     y = _draw_common_pdf_header(
         pdf,
         title,
+        exam_name=exam_name,
         exam_date=exam_date,
         session_name=session_name,
         start_time=start_time,
@@ -3779,6 +3788,7 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
                 h.seating_capacity,
 
                 e.exam_date,
+                e.exam_name,
 
                 -- --------------------------------------------------
                 -- Course/Year-wise Subject
@@ -4160,6 +4170,7 @@ def _build_pdf2_seating(exam_id=None, hall_id=None):
             y = _draw_common_pdf_header(
                 pdf,
                 "HALL ALLOTMENT",
+                exam_name=first.get("exam_name"),
                 exam_date=first.get("exam_date"),
                 session_name=session_text,
                 landscape_page=True,
@@ -5797,6 +5808,7 @@ def _build_pdf1_general(exam_id=None, hall_id=None):
             pdf,
             "HALL ALLOTMENT",
 
+            rows[0]["exam_name"],
             rows[0]["exam_date"],
 
             rows[0].get("session") or "",
@@ -5888,6 +5900,7 @@ def _build_pdf1_general(exam_id=None, hall_id=None):
                 y = _draw_pdf_header(
                     pdf,
                     "HALL ALLOTMENT",
+                    rows[0]["exam_name"],
                     rows[0]["exam_date"],
                     rows[0].get("session") or "",
                     _format_display_time(rows[0]["start_time"]),
@@ -6055,6 +6068,7 @@ def _build_student_signature_pdf(exam_id=None):
             y = _draw_common_pdf_header(
                 pdf,
                 "STUDENT HALL ALLOTMENT",
+                exam_name=first.get("exam_name"),
                 exam_date=first.get("exam_date"),
                 landscape_page=False,
             )
@@ -6301,6 +6315,7 @@ def _build_hall_faculty_signature_pdf(exam_id=None):
             _draw_common_pdf_header(
                 pdf,
                 "HALL FACULTY SIGNATURE SHEET",
+                exam_name=row0.get("exam_name"),
                 exam_date=row0.get("exam_date"),
                 session_name=row0.get("session"),
                 start_time=_format_display_time(row0.get("start_time")),
@@ -11001,25 +11016,16 @@ def student_hall_pdf():
         )
 
         width, height = A4
-        y = height - 60
-
-        pdf.setFont("Helvetica-Bold", 18)
-        pdf.drawCentredString(
-            width / 2,
-            y,
-            "COLLEGE EXAMINATION CELL"
+        y = _draw_common_pdf_header(
+            pdf,
+            "HALL ALLOTMENT",
+            exam_name=allotment.get("exam_name"),
+            exam_date=allotment.get("exam_date"),
+            session_name=allotment.get("session"),
+            landscape_page=False,
         )
 
-        y -= 35
-
-        pdf.setFont("Helvetica-Bold", 15)
-        pdf.drawCentredString(
-            width / 2,
-            y,
-            "HALL ALLOTMENT"
-        )
-
-        y -= 55
+        y -= 12
 
         details = [
             ("Register Number", allotment["register_number"]),
@@ -12710,11 +12716,36 @@ def admin_attendance_pdf():
             alignment=1
         )
 
+        attendance_exam_name = ''
+        try:
+            cur.execute("""
+                SELECT e.exam_name
+                FROM exam_attendance ea
+                INNER JOIN allotments a ON a.id = ea.allotment_id
+                INNER JOIN exam_timetable e ON e.id = a.exam_id
+                WHERE LOWER(COALESCE(ea.attendance_status, '')) = %s
+                  AND e.exam_name IS NOT NULL
+                  AND TRIM(e.exam_name) <> ''
+                ORDER BY e.exam_date DESC, e.id DESC
+                LIMIT 1
+            """, (status,))
+            meta = cur.fetchone()
+            attendance_exam_name = str(meta.get('exam_name') or '').strip() if meta else ''
+        except Exception:
+            pass
+
         story = []
 
         story.append(
             Paragraph(
-                'COLLEGE EXAMINATION CELL',
+                'CONTROLLER OF EXAMINATIONS',
+                title_style
+            )
+        )
+
+        story.append(
+            Paragraph(
+                f'Exam Name : {attendance_exam_name}' if attendance_exam_name else 'Exam Name : -',
                 title_style
             )
         )
@@ -13028,6 +13059,24 @@ def admin_attendance_summary_pdf():
         """)
         arrear_rows = cur.fetchall()
 
+        attendance_exam_name = ''
+        try:
+            cur.execute("""
+                SELECT e.exam_name
+                FROM exam_attendance ea
+                INNER JOIN allotments a ON a.id = ea.allotment_id
+                INNER JOIN exam_timetable e ON e.id = a.exam_id
+                WHERE LOWER(COALESCE(ea.attendance_status, '')) IN ('present', 'absent')
+                  AND e.exam_name IS NOT NULL
+                  AND TRIM(e.exam_name) <> ''
+                ORDER BY e.exam_date DESC, e.id DESC
+                LIMIT 1
+            """)
+            meta = cur.fetchone()
+            attendance_exam_name = str(meta.get('exam_name') or '').strip() if meta else ''
+        except Exception:
+            pass
+
         grouped = {}
         for row in regular_rows + arrear_rows:
             course = str(row.get('course') or 'Unknown Course').strip()
@@ -13137,7 +13186,11 @@ def admin_attendance_summary_pdf():
             college_header,
             Spacer(1, 4),
             Paragraph('OTHAKUTHIRAI, GOBI - 638455', college_address_style),
-            Paragraph('COLLEGE EXAMINATION CELL', title_style),
+            Paragraph('CONTROLLER OF EXAMINATIONS', title_style),
+            Paragraph(
+                f'Exam Name : {attendance_exam_name}' if attendance_exam_name else 'Exam Name : -',
+                college_address_style
+            ),
             Paragraph(pdf_title, title_style),
             Spacer(1, 10),
         ]
@@ -14383,10 +14436,28 @@ def _build_arrear_hall_allotment_pdf(exam_date=None):
                 seen_cy.add(text.lower())
                 course_years.append(text)
 
+        # Get the exam name for this exam date.
+        exam_name = ''
+        try:
+            cur.execute("""
+                SELECT exam_name
+                FROM exam_timetable
+                WHERE exam_date = %s
+                  AND exam_name IS NOT NULL
+                  AND TRIM(exam_name) <> ''
+                ORDER BY id DESC
+                LIMIT 1
+            """, (d,))
+            exam_meta = cur.fetchone()
+            exam_name = str(exam_meta.get('exam_name') or '').strip() if exam_meta else ''
+        except Exception:
+            pass
+
         # Common college header.
         y = _draw_common_pdf_header(
             pdf,
             'HALL ALLOTMENT',
+            exam_name=exam_name,
             exam_date=d,
             landscape_page=False,
         )
@@ -14439,6 +14510,7 @@ def _build_arrear_hall_allotment_pdf(exam_date=None):
                 y = _draw_common_pdf_header(
                     pdf,
                     'HALL ALLOTMENT',
+                    exam_name=exam_name,
                     exam_date=d,
                     landscape_page=False,
                 )
@@ -14521,9 +14593,26 @@ def _build_arrear_seating_pdf(exam_date=None):
                 pdf.showPage()
 
             # Common college header.
+            exam_name = ''
+            try:
+                cur.execute("""
+                    SELECT exam_name
+                    FROM exam_timetable
+                    WHERE exam_date = %s
+                      AND exam_name IS NOT NULL
+                      AND TRIM(exam_name) <> ''
+                    ORDER BY id DESC
+                    LIMIT 1
+                """, (d,))
+                exam_meta = cur.fetchone()
+                exam_name = str(exam_meta.get('exam_name') or '').strip() if exam_meta else ''
+            except Exception:
+                pass
+
             y_header = _draw_common_pdf_header(
                 pdf,
                 'HALL ALLOTMENT',
+                exam_name=exam_name,
                 exam_date=d,
                 landscape_page=True,
             )
@@ -14662,9 +14751,26 @@ def _build_arrear_signature_pdf(exam_date=None):
         pdf = canvas.Canvas(path, pagesize=A4)
         width, height = A4
 
+        exam_name = ''
+        try:
+            cur.execute("""
+                SELECT exam_name
+                FROM exam_timetable
+                WHERE exam_date = %s
+                  AND exam_name IS NOT NULL
+                  AND TRIM(exam_name) <> ''
+                ORDER BY id DESC
+                LIMIT 1
+            """, (d,))
+            exam_meta = cur.fetchone()
+            exam_name = str(exam_meta.get('exam_name') or '').strip() if exam_meta else ''
+        except Exception:
+            pass
+
         y_header = _draw_common_pdf_header(
             pdf,
             'HALL FACULTY SIGNATURE SHEET',
+            exam_name=exam_name,
             exam_date=d,
             landscape_page=False,
         )
