@@ -3603,7 +3603,9 @@ def _draw_common_pdf_header(
             pass
 
     # College name.
-    pdf.setFont("Helvetica-Bold", 14)
+    # Use a slightly smaller font so the long official name stays fully
+    # inside the A4 page without clipping or touching the logo.
+    pdf.setFont("Helvetica-Bold", 11.5)
     pdf.drawCentredString(
         page_width / 2,
         page_height - 38,
@@ -3611,7 +3613,7 @@ def _draw_common_pdf_header(
     )
 
     # Address.
-    pdf.setFont("Helvetica", 10)
+    pdf.setFont("Helvetica-Bold", 9.5)
     pdf.drawCentredString(
         page_width / 2,
         page_height - 55,
@@ -3619,7 +3621,7 @@ def _draw_common_pdf_header(
     )
 
     # Examination Cell.
-    pdf.setFont("Helvetica-Bold", 11)
+    pdf.setFont("Helvetica-Bold", 10.5)
     pdf.drawCentredString(
         page_width / 2,
         page_height - 72,
@@ -3627,14 +3629,14 @@ def _draw_common_pdf_header(
     )
 
     # PDF title.
-    pdf.setFont("Helvetica-Bold", 12)
+    pdf.setFont("Helvetica-Bold", 11)
     pdf.drawCentredString(
         page_width / 2,
         page_height - 91,
         str(title),
     )
 
-    y = page_height - 112
+    y = page_height - 110
     pdf.setFont("Helvetica", 8.5)
 
     details = []
@@ -6057,22 +6059,29 @@ def _build_student_signature_pdf(exam_id=None):
                 landscape_page=False,
             )
 
-            if hall_name:
-                pdf.setFont("Helvetica-Bold", 10)
-                pdf.drawCentredString(
-                    width / 2,
-                    y,
-                    f"Hall: {hall_name}"
-                )
-                y -= 15
+            # Keep hall/course/year clearly below the common header.
+            pdf.setFont("Helvetica-Bold", 10)
+            pdf.drawString(
+                left,
+                y,
+                f"Hall : {hall_name or ''}"
+            )
+            y -= 16
 
-            if course is not None and year is not None:
-                pdf.setFont("Helvetica-Bold", 9)
-                pdf.drawCentredString(
-                    width / 2,
-                    y,
-                    f"Course: {course}    Year: {year}"
-                )
+            pdf.setFont("Helvetica-Bold", 9.5)
+            pdf.drawString(
+                left,
+                y,
+                f"Course : {course or ''}"
+            )
+            pdf.drawString(
+                left + 190,
+                y,
+                f"Year : {year or ''}"
+            )
+            y -= 18
+
+            return y
 
         def draw_table_header(y):
             pdf.setFont("Helvetica-Bold", 9)
@@ -6156,7 +6165,11 @@ def _build_student_signature_pdf(exam_id=None):
                     year=year
                 )
 
-                y = height - 145
+                y = draw_page_header(
+                    hall_name=hall_name,
+                    course=course,
+                    year=year
+                )
                 draw_table_header(y)
                 y -= row_h
 
@@ -6168,12 +6181,11 @@ def _build_student_signature_pdf(exam_id=None):
                         pdf.drawString(45, 35, "Principal Signature")
                         pdf.drawRightString(width - 45, 35, "Faculty Signature")
                         pdf.showPage()
-                        draw_page_header(
+                        y = draw_page_header(
                             hall_name=hall_name,
                             course=course,
                             year=year
                         )
-                        y = _draw_common_pdf_header(pdf, "STUDENT HALL ALLOTMENT", exam_date=rows[0].get("exam_date"))
                         draw_table_header(y)
                         y -= row_h
 
