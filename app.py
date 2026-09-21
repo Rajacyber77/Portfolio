@@ -4,7 +4,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
-from reportlab.lib.utils import ImageReader
 from io import BytesIO
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -3563,88 +3562,13 @@ def _fetch_allotment_groups(cursor):
         result.append(group)
     return result
 #=========================================
-# PDF COMMON HEADER
+#pdf
 #=========================================
 
-COLLEGE_NAME = "SHREE VENKATESWARA ARTS AND SCIENCE COLLEGE"
-COLLEGE_LOGO_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "static",
-    "images",
-    "SVCAS-Logo.webp"
-)
-
-def _get_exam_name_for_date(cursor, exam_date):
-    """Get the exam name for a date, preferring HALL ALLOTMENT metadata."""
-    if not exam_date:
-        return ""
-    try:
-        cursor.execute("""
-            SELECT exam_name
-            FROM exam_timetable
-            WHERE exam_date = %s
-              AND exam_name IS NOT NULL
-              AND TRIM(exam_name) <> ''
-            ORDER BY CASE WHEN UPPER(TRIM(course)) = 'HALL ALLOTMENT' THEN 0 ELSE 1 END, id DESC
-            LIMIT 1
-        """, (exam_date,))
-        row = cursor.fetchone()
-        if row:
-            value = row.get("exam_name") if isinstance(row, dict) else row[0]
-            return str(value or "").strip()
-    except Exception:
-        pass
-    return ""
-
-def _draw_common_pdf_header(pdf, title, exam_name=None, exam_date=None, width=None, height=None, landscape_page=False):
-    """Draw the common logo + college + exam name + date header."""
-    if width is None or height is None:
-        width, height = pdf._pagesize
-
-    logo_w = 48
-    logo_h = 48
-    logo_x = 32
-    logo_y = height - 62
-    if os.path.exists(COLLEGE_LOGO_PATH):
-        try:
-            pdf.drawImage(
-                ImageReader(COLLEGE_LOGO_PATH),
-                logo_x, logo_y,
-                width=logo_w, height=logo_h,
-                preserveAspectRatio=True,
-                mask='auto'
-            )
-        except Exception:
-            pass
-
-    center_x = width / 2
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawCentredString(center_x, height - 30, COLLEGE_NAME)
-
-    pdf.setFont("Helvetica-Bold", 11)
-    pdf.drawCentredString(center_x, height - 46, "COLLEGE EXAMINATION CELL")
-
-    pdf.setFont("Helvetica-Bold", 11)
-    pdf.drawCentredString(center_x, height - 62, str(title or ""))
-
-    meta = []
-    if exam_name:
-        meta.append("Exam Name : " + str(exam_name))
-    if exam_date is not None and str(exam_date).strip():
-        meta.append("Exam Date : " + str(exam_date))
-    if meta:
-        pdf.setFont("Helvetica", 9)
-        pdf.drawCentredString(center_x, height - 78, "    |    ".join(meta))
-
-    return height - 94
-
-
 def _draw_pdf_header(
-
     pdf,
     title,
     exam_date=None,
-    exam_name=None,
     session_name=None,
     start_time=None,
     end_time=None,
@@ -3655,14 +3579,53 @@ def _draw_pdf_header(
 ):
     width, height = A4
 
-    y = _draw_common_pdf_header(
-        pdf,
-        title,
-        exam_name=exam_name,
-        exam_date=exam_date,
-        width=width,
-        height=height
+    y = height - 42
+
+    # ==================================================
+    # COLLEGE NAME
+    # ==================================================
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        14
     )
+
+    pdf.drawCentredString(
+        width / 2,
+        y,
+        "SHREE VENKATESWARA ARTS AND SCIENCE COLLEGE"
+    )
+
+    y -= 18
+
+    # ==================================================
+    # EXAMINATION CELL
+    # ==================================================
+
+    pdf.setFont(
+        "Helvetica-Bold",
+        12
+    )
+
+    pdf.drawCentredString(
+        width / 2,
+        y,
+        "COLLEGE EXAMINATION CELL"
+    )
+
+    y -= 18
+
+    # ==================================================
+    # TITLE
+    # ==================================================
+
+    pdf.drawCentredString(
+        width / 2,
+        y,
+        title
+    )
+
+    y -= 24
 
     # ==================================================
     # DETAILS
@@ -5875,8 +5838,6 @@ def _build_pdf1_general(exam_id=None, hall_id=None):
 
             rows[0]["exam_date"],
 
-            rows[0].get("exam_name") or "",
-
             rows[0].get("session") or "",
 
             _format_display_time(
@@ -5967,7 +5928,6 @@ def _build_pdf1_general(exam_id=None, hall_id=None):
                     pdf,
                     "HALL ALLOTMENT",
                     rows[0]["exam_date"],
-                    rows[0].get("exam_name") or "",
                     rows[0].get("session") or "",
                     _format_display_time(rows[0]["start_time"]),
                     _format_display_time(rows[0]["end_time"]),
@@ -6130,18 +6090,22 @@ def _build_student_signature_pdf(exam_id=None):
         headers = ["S.No", "Reg.No", "Name", "Signature"]
 
         def draw_page_header(hall_name=None, course=None, year=None):
+            pdf.setFont("Helvetica-Bold", 15)
+            pdf.drawCentredString(
+                width / 2,
+                height - 42,
+                "STUDENT HALL ALLOTMENT"
+            )
+
             first = rows[0]
             exam_date = str(first.get("exam_date") or "")
             exam_name = str(first.get("exam_name") or "").strip()
 
-            _draw_common_pdf_header(
-                pdf,
-                "STUDENT HALL ALLOTMENT",
-                exam_name=exam_name,
-                exam_date=exam_date,
-                width=width,
-                height=height
-            )
+            pdf.setFont("Helvetica", 9)
+            meta = f"Exam Date: {exam_date}"
+            if exam_name:
+                meta += f"    Exam: {exam_name}"
+            pdf.drawCentredString(width / 2, height - 59, meta)
 
             if hall_name:
                 pdf.setFont("Helvetica-Bold", 11)
@@ -6329,7 +6293,6 @@ def _build_hall_faculty_signature_pdf(exam_id=None):
                     SEPARATOR ', '
                 ) AS faculty_name,
                 MIN(e.exam_date) AS exam_date,
-                MIN(e.exam_name) AS exam_name,
                 MIN(e.start_time) AS start_time,
                 MIN(e.end_time) AS end_time,
                 MIN(a.session) AS session
@@ -6360,22 +6323,21 @@ def _build_hall_faculty_signature_pdf(exam_id=None):
         width, height = A4
 
         def draw_page_header():
-            _draw_common_pdf_header(
-                pdf,
-                "HALL FACULTY SIGNATURE SHEET",
-                exam_name=str(rows[0].get("exam_name") or "").strip(),
-                exam_date=str(rows[0].get("exam_date") or ""),
-                width=width,
-                height=height
-            )
+            pdf.setFont("Helvetica-Bold", 15)
+            pdf.drawCentredString(width / 2, height - 45, "HALL FACULTY SIGNATURE SHEET")
+
             if rows[0].get("exam_date"):
-                pdf.setFont("Helvetica", 8.5)
+                pdf.setFont("Helvetica", 9)
+                date_text = str(rows[0]["exam_date"])
                 session_text = str(rows[0].get("session") or "")
                 time_text = (
                     f'{_format_display_time(rows[0]["start_time"])} - '
                     f'{_format_display_time(rows[0]["end_time"])}'
                 )
-                pdf.drawCentredString(width / 2, height - 92, f"Session: {session_text}    Time: {time_text}")
+                pdf.drawCentredString(
+                    width / 2, height - 62,
+                    f"Date: {date_text}    Session: {session_text}    Time: {time_text}"
+                )
 
         draw_page_header()
 
@@ -11834,12 +11796,10 @@ def _attendance_rows(cur, where_sql='', params=()):
                a.seat_number, a.row_no, a.column_no, a.side,
                h.hall_name, s.register_number, s.name AS student_name,
                s.department, s.course, s.year, f.faculty_name,
-               e.exam_date, e.exam_name,
                ea.attendance_status, 0 AS is_arrear
         FROM allotments a
         INNER JOIN students s ON s.id = a.student_id
         INNER JOIN halls h ON h.id = a.hall_id
-        INNER JOIN exam_timetable e ON e.id = a.exam_id
         LEFT JOIN faculty_details f ON f.id = a.faculty_id
         LEFT JOIN exam_attendance ea ON ea.allotment_id = a.id
         {where_sql}
@@ -11854,7 +11814,6 @@ def _attendance_rows(cur, where_sql='', params=()):
                    aa.faculty_id, aa.seat_number, aa.row_no, aa.column_no,
                    aa.side, h.hall_name, s.reg_no AS register_number,
                    s.student_name, s.department, s.course, s.batch AS year,
-                   aa.exam_date, NULL AS exam_name,
                    f.faculty_name, aea.attendance_status, 1 AS is_arrear
             FROM arrear_allotments aa
             INNER JOIN arrear_students s ON s.id = aa.student_id
@@ -12736,19 +12695,6 @@ def admin_attendance_pdf():
                 'ABSENT STUDENTS ATTENDANCE'
             )
 
-        exam_date = ""
-        exam_name = ""
-        for source_row in rows:
-            if source_row.get("exam_date"):
-                exam_date = str(source_row.get("exam_date"))
-            if source_row.get("exam_name"):
-                exam_name = str(source_row.get("exam_name") or "").strip()
-            if exam_date or exam_name:
-                if exam_date and exam_name:
-                    break
-        if not exam_name and exam_date:
-            exam_name = _get_exam_name_for_date(cur, exam_date)
-
         doc = SimpleDocTemplate(
             buffer,
             pagesize=landscape(A4),
@@ -12797,7 +12743,19 @@ def admin_attendance_pdf():
 
         story = []
 
-        story.append(Spacer(1, 35))
+        story.append(
+            Paragraph(
+                'COLLEGE EXAMINATION CELL',
+                title_style
+            )
+        )
+
+        story.append(
+            Paragraph(
+                pdf_title,
+                title_style
+            )
+        )
 
         story.append(
             Spacer(1, 8)
@@ -13022,17 +12980,18 @@ def admin_attendance_pdf():
             canvas_obj,
             doc_obj
         ):
-            _draw_common_pdf_header(
-                canvas_obj,
-                pdf_title,
-                exam_name=exam_name,
-                exam_date=exam_date,
-                width=landscape(A4)[0],
-                height=landscape(A4)[1]
+
+            canvas_obj.setTitle(
+                pdf_title
             )
-            canvas_obj.setTitle(pdf_title)
-            canvas_obj.setAuthor('College Examination Cell')
-            canvas_obj.setSubject('Course and Year Wise Attendance Report')
+
+            canvas_obj.setAuthor(
+                'College Examination Cell'
+            )
+
+            canvas_obj.setSubject(
+                'Course and Year Wise Attendance Report'
+            )
 
         doc.build(
             story,
@@ -13125,18 +13084,6 @@ def admin_attendance_summary_pdf():
         buffer = BytesIO()
         pdf_title = 'ATTENDANCE SUMMARY REPORT'
         pdf_filename = 'Attendance_Summary_Report.pdf'
-        exam_date = ""
-        exam_name = ""
-        for source_row in regular_rows:
-            if source_row.get("exam_date"):
-                exam_date = str(source_row.get("exam_date"))
-            if source_row.get("exam_name"):
-                exam_name = str(source_row.get("exam_name") or "").strip()
-            if exam_date or exam_name:
-                if exam_date and exam_name:
-                    break
-        if not exam_name and exam_date:
-            exam_name = _get_exam_name_for_date(cur, exam_date)
         doc = SimpleDocTemplate(
             buffer,
             pagesize=landscape(A4),
@@ -13162,7 +13109,12 @@ def admin_attendance_summary_pdf():
             fontSize=8, leading=10, alignment=1
         )
 
-        story = [Spacer(1, 45)]
+        story = [
+            Paragraph('COLLEGE EXAMINATION CELL', title_style),
+            Paragraph('OTHAKUTHIRAI, GOBI - 638455', title_style),
+            Paragraph(pdf_title, title_style),
+            Spacer(1, 10),
+        ]
         data = [[
             Paragraph('<b>S.No</b>', head_style),
             Paragraph('<b>Course</b>', head_style),
@@ -13208,14 +13160,6 @@ def admin_attendance_summary_pdf():
         story.append(table)
 
         def set_pdf_metadata(canvas_obj, doc_obj):
-            _draw_common_pdf_header(
-                canvas_obj,
-                pdf_title,
-                exam_name=exam_name,
-                exam_date=exam_date,
-                width=landscape(A4)[0],
-                height=landscape(A4)[1]
-            )
             canvas_obj.setTitle(pdf_title)
             canvas_obj.setAuthor('College Examination Cell')
             canvas_obj.setSubject('Course, Year and Subject Wise Attendance Summary')
@@ -14381,7 +14325,6 @@ def _build_arrear_hall_allotment_pdf(exam_date=None):
         # Same report structure as the uploaded regular Hall Allotment PDF:
         # college heading, examination cell, title, date/session/time/course-year,
         # followed by Hall No / Course / Year / Regno From / Regno To.
-        exam_name = _get_exam_name_for_date(cur, d)
         path = os.path.join(UPLOAD_FOLDER, f"Arrear_Hall_Allotment_{d}.pdf")
         pdf = canvas.Canvas(path, pagesize=A4)
         width, height = A4
@@ -14414,15 +14357,13 @@ def _build_arrear_hall_allotment_pdf(exam_date=None):
                 seen_cy.add(text.lower())
                 course_years.append(text)
 
-        # Common PDF header.
-        _draw_common_pdf_header(
-            pdf,
-            'HALL ALLOTMENT',
-            exam_name=exam_name,
-            exam_date=d,
-            width=width,
-            height=height
-        )
+        # Header matching uploaded PDF.
+        pdf.setFont('Helvetica-Bold', 14)
+        pdf.drawCentredString(width/2, height-42, 'SHREE VENKATESWARA ARTS AND SCIENCE COLLEGE')
+        pdf.setFont('Helvetica-Bold', 12)
+        pdf.drawCentredString(width/2, height-60, 'COLLEGE EXAMINATION CELL')
+        pdf.setFont('Helvetica-Bold', 12)
+        pdf.drawCentredString(width/2, height-78, 'HALL ALLOTMENT')
 
         pdf.setFont('Helvetica', 9.5)
         y = height - 105
@@ -14474,14 +14415,11 @@ def _build_arrear_hall_allotment_pdf(exam_date=None):
         for g in groups:
             if y < 42:
                 pdf.showPage()
-                _draw_common_pdf_header(
-                    pdf,
-                    'HALL ALLOTMENT',
-                    exam_name=exam_name,
-                    exam_date=d,
-                    width=width,
-                    height=height
-                )
+                pdf.setFont('Helvetica-Bold', 14)
+                pdf.drawCentredString(width/2, height-42, 'SHREE VENKATESWARA ARTS AND SCIENCE COLLEGE')
+                pdf.setFont('Helvetica-Bold', 12)
+                pdf.drawCentredString(width/2, height-60, 'COLLEGE EXAMINATION CELL')
+                pdf.drawCentredString(width/2, height-78, 'HALL ALLOTMENT')
                 pdf.setFont('Helvetica', 9.5)
                 y = height - 105
                 pdf.drawString(45, y, f'Exam Date : {d}')
@@ -14702,15 +14640,8 @@ def _build_arrear_signature_pdf(exam_date=None):
         pdf = canvas.Canvas(path, pagesize=A4)
         width, height = A4
 
-        exam_name = _get_exam_name_for_date(cur, d)
-        _draw_common_pdf_header(
-            pdf,
-            'HALL FACULTY SIGNATURE SHEET',
-            exam_name=exam_name,
-            exam_date=d,
-            width=width,
-            height=height
-        )
+        pdf.setFont('Helvetica-Bold', 15)
+        pdf.drawCentredString(width/2, height-45, 'HALL FACULTY SIGNATURE SHEET')
         pdf.setFont('Helvetica', 9)
         pdf.drawString(45, height-68, f'Date: {d}')
 
