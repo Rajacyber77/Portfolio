@@ -5724,6 +5724,7 @@ def _build_pdf1_general(exam_id=None, hall_id=None):
                 h.hall_name,
 
                 e.exam_date,
+                e.exam_name,
                 e.start_time,
                 e.end_time,
                 a.session
