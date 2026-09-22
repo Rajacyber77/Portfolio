@@ -15,6 +15,7 @@ import re
 import os
 import traceback
 import time
+import threading
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -11683,52 +11684,110 @@ def uploaded_file(filename):
 # EXAM HALL ATTENDANCE SYSTEM
 # ==================================================
 
+# Attendance table initialization is done once per Flask worker.
+# This avoids CREATE TABLE + COMMIT on every faculty attendance request.
+_attendance_tables_ready = False
+_attendance_tables_lock = threading.Lock()
+
+
+def ensure_attendance_tables_once():
+    """
+    Create attendance-related tables only once per Flask worker.
+
+    IMPORTANT:
+    This function does NOT modify hall-allotment logic.
+    """
+    global _attendance_tables_ready
+
+    if _attendance_tables_ready:
+        return
+
+    with _attendance_tables_lock:
+        if _attendance_tables_ready:
+            return
+
+        db = None
+        cur = None
+
+        try:
+            db = get_db_connection()
+            cur = db.cursor()
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS exam_attendance (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    allotment_id INT NOT NULL UNIQUE,
+                    student_id INT NOT NULL,
+                    hall_id INT NOT NULL,
+                    exam_id INT NOT NULL,
+                    faculty_id INT NOT NULL,
+                    attendance_status VARCHAR(20) NOT NULL,
+                    marked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_attendance_hall (hall_id),
+                    INDEX idx_attendance_exam (exam_id),
+                    INDEX idx_attendance_faculty (faculty_id)
+                )
+            """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS exam_attendance_closures (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    hall_id INT NOT NULL,
+                    exam_id INT NOT NULL,
+                    closed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uq_attendance_close_hall_exam
+                        (hall_id, exam_id),
+                    INDEX idx_close_hall (hall_id),
+                    INDEX idx_close_exam (exam_id)
+                )
+            """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS arrear_exam_attendance (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    arrear_allotment_id INT NOT NULL UNIQUE,
+                    student_id INT NOT NULL,
+                    hall_id INT NOT NULL,
+                    exam_date DATE NOT NULL,
+                    faculty_id INT NULL,
+                    attendance_status VARCHAR(20) NOT NULL,
+                    marked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        ON UPDATE CURRENT_TIMESTAMP
+                )
+            """)
+
+            db.commit()
+            _attendance_tables_ready = True
+            print("ATTENDANCE TABLES READY", flush=True)
+
+        except Exception:
+            if db:
+                try:
+                    db.rollback()
+                except Exception:
+                    pass
+            raise
+
+        finally:
+            if cur:
+                try:
+                    cur.close()
+                except Exception:
+                    pass
+            if db:
+                try:
+                    db.close()
+                except Exception:
+                    pass
+
+
 def ensure_attendance_table():
-    """Create the attendance table once; does not alter hall-allotment logic."""
-    db = None
-    cur = None
-    try:
-        db = get_db_connection()
-        cur = db.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS exam_attendance (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                allotment_id INT NOT NULL UNIQUE,
-                student_id INT NOT NULL,
-                hall_id INT NOT NULL,
-                exam_id INT NOT NULL,
-                faculty_id INT NOT NULL,
-                attendance_status VARCHAR(20) NOT NULL,
-                marked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_attendance_hall (hall_id),
-                INDEX idx_attendance_exam (exam_id),
-                INDEX idx_attendance_faculty (faculty_id)
-            )
-        """)
+    ensure_attendance_tables_once()
 
-        # ----------------------------------------------------------
-        # ADMIN ATTENDANCE CLOSE TABLE
-        # Stores a separate close status for each HALL + EXAM.
-        # Existing attendance table / marking logic is not changed.
-        # ----------------------------------------------------------
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS exam_attendance_closures (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                hall_id INT NOT NULL,
-                exam_id INT NOT NULL,
-                closed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY uq_attendance_close_hall_exam (hall_id, exam_id),
-                INDEX idx_close_hall (hall_id),
-                INDEX idx_close_exam (exam_id)
-            )
-        """)
 
-        db.commit()
-    finally:
-        if cur:
-            cur.close()
-        if db:
-            db.close()
+def ensure_arrear_attendance_table():
+    ensure_attendance_tables_once()
 
 
 def _attendance_timetable_map(cur, exam_ids):
@@ -11854,8 +11913,7 @@ def faculty_attendance():
         return redirect(url_for('faculty_login'))
 
     faculty_id = session.get('faculty_db_id')
-    ensure_attendance_table()
-    ensure_arrear_attendance_table()
+    ensure_attendance_tables_once()
 
     db = None
     cur = None
@@ -11973,55 +12031,93 @@ h1{{color:#b91c1c;margin-bottom:18px;}}
             if not faculty_allotments and not faculty_arrear_allotments:
                 return redirect(url_for('faculty_attendance_submitted'))
 
-            changed = 0
+            # ==========================================================
+            # PREPARE REGULAR ATTENDANCE
+            # Checkbox checked   -> ABSENT
+            # Checkbox unchecked -> PRESENT
+            # ==========================================================
+            regular_values = []
 
             for a in faculty_allotments:
                 allotment_id = int(a['id'])
+
                 status = (
                     "absent"
                     if f"attendance_{allotment_id}" in request.form
                     else "present"
                 )
-                cur.execute('''
-                    INSERT INTO exam_attendance
-                    (allotment_id, student_id, hall_id, exam_id,
-                     faculty_id, attendance_status)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE
-                        attendance_status = VALUES(attendance_status),
-                        faculty_id = VALUES(faculty_id),
-                        marked_at = CURRENT_TIMESTAMP
-                ''', (
-                    allotment_id, a['student_id'], a['hall_id'],
-                    a['exam_id'], a['faculty_id'], status
+
+                regular_values.append((
+                    allotment_id,
+                    a['student_id'],
+                    a['hall_id'],
+                    a['exam_id'],
+                    a['faculty_id'],
+                    status
                 ))
-                changed += 1
+
+            # ==========================================================
+            # PREPARE ARREAR ATTENDANCE
+            # ==========================================================
+            arrear_values = []
 
             for a in faculty_arrear_allotments:
                 arrear_id = int(a['arrear_allotment_id'])
                 form_id = -arrear_id
+
                 status = (
                     "absent"
                     if f"attendance_{form_id}" in request.form
                     else "present"
                 )
-                cur.execute('''
-                    INSERT INTO arrear_exam_attendance
-                    (arrear_allotment_id, student_id, hall_id, exam_date,
-                     faculty_id, attendance_status)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE
-                        attendance_status = VALUES(attendance_status),
-                        faculty_id = VALUES(faculty_id),
-                        marked_at = CURRENT_TIMESTAMP
-                ''', (
-                    arrear_id, a['student_id'], a['hall_id'],
-                    a['exam_date'], a['faculty_id'], status
+
+                arrear_values.append((
+                    arrear_id,
+                    a['student_id'],
+                    a['hall_id'],
+                    a['exam_date'],
+                    a['faculty_id'],
+                    status
                 ))
-                changed += 1
 
-            db.commit()
+            try:
+                if regular_values:
+                    cur.executemany('''
+                        INSERT INTO exam_attendance
+                        (allotment_id, student_id, hall_id, exam_id,
+                         faculty_id, attendance_status)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE
+                            attendance_status = VALUES(attendance_status),
+                            faculty_id = VALUES(faculty_id),
+                            marked_at = CURRENT_TIMESTAMP
+                    ''', regular_values)
 
+                if arrear_values:
+                    cur.executemany('''
+                        INSERT INTO arrear_exam_attendance
+                        (arrear_allotment_id, student_id, hall_id,
+                         exam_date, faculty_id, attendance_status)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE
+                            attendance_status = VALUES(attendance_status),
+                            faculty_id = VALUES(faculty_id),
+                            marked_at = CURRENT_TIMESTAMP
+                    ''', arrear_values)
+
+                db.commit()
+
+            except Exception:
+                try:
+                    db.rollback()
+                except Exception:
+                    pass
+                raise
+
+            changed = (
+                len(regular_values)
+                + len(arrear_values)
+            )
             # Do NOT redirect back to faculty-attendance.
             return redirect(
                 url_for(
@@ -12095,6 +12191,20 @@ h1{{color:#b91c1c;margin-bottom:18px;}}
             faculty_code=session.get('faculty_code', ''),
             saved=request.args.get('saved', '0')
         )
+
+    except Exception as e:
+        if db:
+            try:
+                db.rollback()
+            except Exception:
+                pass
+
+        print(
+            "FACULTY ATTENDANCE ERROR:",
+            str(e),
+            flush=True
+        )
+        raise
 
     finally:
         if cur:
